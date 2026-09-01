@@ -1,0 +1,26 @@
+---
+name: conventional-pr
+"on":
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+jobs:
+  lint-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: CondeNast/conventional-pull-request-action@3ce30fdb4d2beef8b941f23a1114dd8188eba082 # v0.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # if the PR contains a single commit, fail if the commit message and the PR title do not match
+          commitTitleMatch: 'true'
+          # squash merges default to the PR title, so lint the title rather than every commit
+          ignoreCommits: 'true'

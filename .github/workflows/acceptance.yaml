@@ -1,0 +1,52 @@
+---
+name: acceptance
+
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * 1-5"
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/acceptance.yaml"
+      - "Taskfile.yaml"
+      - "bin/**"
+      - "cmd/**"
+      - "go.mod"
+      - "go.sum"
+      - "internal/**"
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - ".github/workflows/acceptance.yaml"
+      - "Taskfile.yaml"
+      - "bin/**"
+      - "cmd/**"
+      - "go.mod"
+      - "go.sum"
+      - "internal/**"
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Activate Hermit
+        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v1
+        with:
+          cache: "true"
+
+      # The provider has no live API surface yet, so the acceptance suite is a
+      # provider-level smoke test and runs unconditionally. Once Polylane API
+      # resources land, gate mutating runs behind a `live-acceptance` PR label
+      # and a POLYLANE_API_KEY repository secret.
+      - name: Run acceptance tests
+        run: task test:acc
