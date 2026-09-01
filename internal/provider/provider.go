@@ -40,7 +40,7 @@ func (p *polylaneProvider) Metadata(_ context.Context, _ provider.MetadataReques
 
 func (p *polylaneProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manage an existing Polylane workspace, members, teams, and workspace-level settings.",
+		Description: "Manage an existing Polylane workspace, members, teams, workspace-level settings, and customer-owned cloud connections.",
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
 				Optional:    true,
@@ -117,6 +117,8 @@ func (p *polylaneProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *polylaneProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewAWSConnectionRequestResource,
+		NewAWSConnectionResource,
 		NewWorkspaceResource,
 		NewWorkspaceMemberResource,
 		NewTeamResource,

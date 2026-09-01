@@ -7,6 +7,8 @@ surface:
 - adopting an existing workspace;
 - adopting existing workspace members and managing their roles and scopes;
 - managing teams and team membership;
+- connecting customer-managed AWS infrastructure without giving the Polylane
+  provider AWS credentials or AWS resource ownership;
 - managing autofix, digest, investigation, investigation-limit, model-training,
   observability, and pull-request-review settings.
 
@@ -45,6 +47,42 @@ Removing an adopted workspace, workspace member, or workspace settings resource
 from Terraform configuration stops Terraform management. It does not delete or
 reset the adopted object in Polylane. Teams and team memberships are normal
 lifecycle resources and are deleted when removed from configuration.
+
+### Customer-managed AWS connections
+
+AWS onboarding is deliberately split around the customer's AWS resources. A
+`polylane_aws_connection_request` first returns the Polylane-issued STS external
+ID, trusted principal, and SNS subscription endpoint. The customer uses those
+values in ordinary resources from the `hashicorp/aws` provider, then passes the
+resulting identifiers to `polylane_aws_connection` for validation and
+registration.
+
+```hcl
+resource "polylane_aws_connection_request" "this" {
+  workspace_id = polylane_workspace.current.id
+  account_id   = data.aws_caller_identity.current.account_id
+  regions      = ["us-east-1"]
+}
+
+# aws_iam_role, aws_s3_bucket, aws_sns_topic,
+# aws_sns_topic_subscription, and aws_cloudtrail are managed by the customer.
+
+resource "polylane_aws_connection" "this" {
+  workspace_id           = polylane_workspace.current.id
+  request_id             = polylane_aws_connection_request.this.id
+  region                 = polylane_aws_connection_request.this.region
+  role_arn               = aws_iam_role.polylane.arn
+  bucket_name            = aws_s3_bucket.cloudtrail.id
+  topic_arn              = aws_sns_topic.cloudtrail.arn
+  topic_subscription_arn = aws_sns_topic_subscription.polylane.arn
+  cloudtrail_name        = aws_cloudtrail.polylane.name
+}
+```
+
+The Polylane provider never reads AWS credentials and never creates, updates,
+or deletes these AWS resources. On destroy it deregisters the Polylane
+connection; Terraform's dependency graph then leaves AWS teardown to the AWS
+provider and the customer's own lifecycle rules.
 
 Generated provider documentation lives in [docs/](docs/) and is published on the
 Terraform Registry.

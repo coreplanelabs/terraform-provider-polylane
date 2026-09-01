@@ -30,6 +30,17 @@ const (
 	AutofixConfigTriggerModeAuto     AutofixConfigTriggerMode = "auto"
 )
 
+// Defines values for AwsConnectionActivationProvisioningStatus.
+const (
+	AwsConnectionActivationProvisioningStatusRegistered AwsConnectionActivationProvisioningStatus = "registered"
+)
+
+// Defines values for AwsConnectionRequestStatus.
+const (
+	AwsConnectionRequestStatusPending    AwsConnectionRequestStatus = "pending"
+	AwsConnectionRequestStatusRegistered AwsConnectionRequestStatus = "registered"
+)
+
 // Defines values for InvestigationLimitsConfigMinAutoInvestigateSeverity.
 const (
 	Critical InvestigationLimitsConfigMinAutoInvestigateSeverity = "critical"
@@ -296,6 +307,26 @@ const (
 	WorkspacesPatchJSONBodyLlmProviderZ           WorkspacesPatchJSONBodyLlmProvider = "z"
 )
 
+// ActivateAwsConnection defines model for ActivateAwsConnection.
+type ActivateAwsConnection struct {
+	BucketName     string `json:"bucketName"`
+	CloudTrailName string `json:"cloudTrailName"`
+
+	// Region AWS region
+	Region string `json:"region"`
+
+	// RequestId ID of the cloudformation_template
+	RequestId string `json:"requestId"`
+	RoleArn   string `json:"roleArn"`
+	TopicArn  string `json:"topicArn"`
+
+	// TopicSubscriptionArn Confirmed HTTPS subscription ARN for the request's subscriptionEndpoint
+	TopicSubscriptionArn string `json:"topicSubscriptionArn"`
+
+	// WorkspaceId ID of the workspace
+	WorkspaceId string `json:"workspaceId"`
+}
+
 // AutofixConfig defines model for AutofixConfig.
 type AutofixConfig struct {
 	// DisabledAt When set, Polylane does not open new autofix pull requests on any repository in the workspace
@@ -314,6 +345,72 @@ type AutofixConfigTriggerMode string
 // AutofixSettings defines model for AutofixSettings.
 type AutofixSettings struct {
 	Autofix AutofixConfig `json:"autofix"`
+}
+
+// AwsConnectionActivation defines model for AwsConnectionActivation.
+type AwsConnectionActivation struct {
+	// CloudAccountId ID of the cloud_account
+	CloudAccountId string `json:"cloudAccountId"`
+
+	// ProvisioningStatus Registration is durable and initial sync has been queued; this does not mean initial sync is complete.
+	ProvisioningStatus AwsConnectionActivationProvisioningStatus `json:"provisioningStatus"`
+
+	// RequestId ID of the cloudformation_template
+	RequestId string `json:"requestId"`
+}
+
+// AwsConnectionActivationProvisioningStatus Registration is durable and initial sync has been queued; this does not mean initial sync is complete.
+type AwsConnectionActivationProvisioningStatus string
+
+// AwsConnectionRequest defines model for AwsConnectionRequest.
+type AwsConnectionRequest struct {
+	// AwsAccountId Twelve-digit AWS account ID
+	AwsAccountId string `json:"awsAccountId"`
+
+	// CloudAccountId ID of the cloud_account
+	CloudAccountId *string `json:"cloudAccountId"`
+
+	// ExternalId External ID required when Polylane assumes the customer role
+	ExternalId string `json:"externalId"`
+
+	// Region Handshake region where the CloudTrail trail and SNS topic must live
+	Region  string    `json:"region"`
+	Regions *[]string `json:"regions"`
+
+	// RequestId ID of the cloudformation_template
+	RequestId string                     `json:"requestId"`
+	Status    AwsConnectionRequestStatus `json:"status"`
+
+	// SubscriptionEndpoint HTTPS endpoint the customer-managed SNS subscription must target
+	SubscriptionEndpoint string              `json:"subscriptionEndpoint"`
+	TrustedPrincipal     AwsTrustedPrincipal `json:"trustedPrincipal"`
+}
+
+// AwsConnectionRequestStatus defines model for AwsConnectionRequest.Status.
+type AwsConnectionRequestStatus string
+
+// AwsTrustedPrincipal defines model for AwsTrustedPrincipal.
+type AwsTrustedPrincipal struct {
+	// AccountId Polylane AWS account ID
+	AccountId string `json:"accountId"`
+
+	// Arn AWS principal ARN to place in the customer role trust policy
+	Arn string `json:"arn"`
+}
+
+// CreateAwsConnectionRequest defines model for CreateAwsConnectionRequest.
+type CreateAwsConnectionRequest struct {
+	// AwsAccountId Twelve-digit AWS account ID
+	AwsAccountId string `json:"awsAccountId"`
+
+	// IdempotencyKey Opaque caller-stable idempotency key. Reusing it with identical account and regions returns the same request; reusing it with different inputs returns 409.
+	IdempotencyKey string `json:"idempotencyKey"`
+
+	// Regions Regions Polylane may scan. Null means every enabled region.
+	Regions *[]string `json:"regions"`
+
+	// WorkspaceId ID of the workspace
+	WorkspaceId string `json:"workspaceId"`
 }
 
 // CustomModelTiers defines model for CustomModelTiers.
@@ -782,6 +879,12 @@ type WorkspacesObservabilitySettingsPatchJSONBody struct {
 	} `json:"nativeObservability"`
 }
 
+// AwsConnectionRequestsCreateJSONRequestBody defines body for AwsConnectionRequestsCreate for application/json ContentType.
+type AwsConnectionRequestsCreateJSONRequestBody = CreateAwsConnectionRequest
+
+// AwsConnectionsActivateJSONRequestBody defines body for AwsConnectionsActivate for application/json ContentType.
+type AwsConnectionsActivateJSONRequestBody = ActivateAwsConnection
+
 // TeamsPostJSONRequestBody defines body for TeamsPost for application/json ContentType.
 type TeamsPostJSONRequestBody TeamsPostJSONBody
 
@@ -891,6 +994,25 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// AwsConnectionRequestsCreateWithBody request with any body
+	AwsConnectionRequestsCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	AwsConnectionRequestsCreate(ctx context.Context, body AwsConnectionRequestsCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AwsConnectionRequestsDelete request
+	AwsConnectionRequestsDelete(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AwsConnectionRequestsGet request
+	AwsConnectionRequestsGet(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AwsConnectionsActivateWithBody request with any body
+	AwsConnectionsActivateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	AwsConnectionsActivate(ctx context.Context, body AwsConnectionsActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CloudAccountsDisconnect request
+	CloudAccountsDisconnect(ctx context.Context, workspaceId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// TeamsPostWithBody request with any body
 	TeamsPostWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -992,6 +1114,90 @@ type ClientInterface interface {
 	WorkspacesPrReviewSettingsPatchWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkspacesPrReviewSettingsPatch(ctx context.Context, id string, body WorkspacesPrReviewSettingsPatchJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) AwsConnectionRequestsCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionRequestsCreateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AwsConnectionRequestsCreate(ctx context.Context, body AwsConnectionRequestsCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionRequestsCreateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AwsConnectionRequestsDelete(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionRequestsDeleteRequest(c.Server, workspaceId, requestId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AwsConnectionRequestsGet(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionRequestsGetRequest(c.Server, workspaceId, requestId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AwsConnectionsActivateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionsActivateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AwsConnectionsActivate(ctx context.Context, body AwsConnectionsActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAwsConnectionsActivateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CloudAccountsDisconnect(ctx context.Context, workspaceId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCloudAccountsDisconnectRequest(c.Server, workspaceId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) TeamsPostWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1448,6 +1654,209 @@ func (c *Client) WorkspacesPrReviewSettingsPatch(ctx context.Context, id string,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewAwsConnectionRequestsCreateRequest calls the generic AwsConnectionRequestsCreate builder with application/json body
+func NewAwsConnectionRequestsCreateRequest(server string, body AwsConnectionRequestsCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAwsConnectionRequestsCreateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewAwsConnectionRequestsCreateRequestWithBody generates requests for AwsConnectionRequestsCreate with any type of body
+func NewAwsConnectionRequestsCreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/aws_connection_requests")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewAwsConnectionRequestsDeleteRequest generates requests for AwsConnectionRequestsDelete
+func NewAwsConnectionRequestsDeleteRequest(server string, workspaceId string, requestId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "workspaceId", runtime.ParamLocationPath, workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "requestId", runtime.ParamLocationPath, requestId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/aws_connection_requests/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAwsConnectionRequestsGetRequest generates requests for AwsConnectionRequestsGet
+func NewAwsConnectionRequestsGetRequest(server string, workspaceId string, requestId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "workspaceId", runtime.ParamLocationPath, workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "requestId", runtime.ParamLocationPath, requestId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/aws_connection_requests/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAwsConnectionsActivateRequest calls the generic AwsConnectionsActivate builder with application/json body
+func NewAwsConnectionsActivateRequest(server string, body AwsConnectionsActivateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAwsConnectionsActivateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewAwsConnectionsActivateRequestWithBody generates requests for AwsConnectionsActivate with any type of body
+func NewAwsConnectionsActivateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/aws_connections")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCloudAccountsDisconnectRequest generates requests for CloudAccountsDisconnect
+func NewCloudAccountsDisconnectRequest(server string, workspaceId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "workspaceId", runtime.ParamLocationPath, workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/cloud_accounts/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewTeamsPostRequest calls the generic TeamsPost builder with application/json body
@@ -2854,6 +3263,25 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// AwsConnectionRequestsCreateWithBodyWithResponse request with any body
+	AwsConnectionRequestsCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsCreateResponse, error)
+
+	AwsConnectionRequestsCreateWithResponse(ctx context.Context, body AwsConnectionRequestsCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsCreateResponse, error)
+
+	// AwsConnectionRequestsDeleteWithResponse request
+	AwsConnectionRequestsDeleteWithResponse(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsDeleteResponse, error)
+
+	// AwsConnectionRequestsGetWithResponse request
+	AwsConnectionRequestsGetWithResponse(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsGetResponse, error)
+
+	// AwsConnectionsActivateWithBodyWithResponse request with any body
+	AwsConnectionsActivateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AwsConnectionsActivateResponse, error)
+
+	AwsConnectionsActivateWithResponse(ctx context.Context, body AwsConnectionsActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*AwsConnectionsActivateResponse, error)
+
+	// CloudAccountsDisconnectWithResponse request
+	CloudAccountsDisconnectWithResponse(ctx context.Context, workspaceId string, id string, reqEditors ...RequestEditorFn) (*CloudAccountsDisconnectResponse, error)
+
 	// TeamsPostWithBodyWithResponse request with any body
 	TeamsPostWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TeamsPostResponse, error)
 
@@ -2955,6 +3383,410 @@ type ClientWithResponsesInterface interface {
 	WorkspacesPrReviewSettingsPatchWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*WorkspacesPrReviewSettingsPatchResponse, error)
 
 	WorkspacesPrReviewSettingsPatchWithResponse(ctx context.Context, id string, body WorkspacesPrReviewSettingsPatchJSONRequestBody, reqEditors ...RequestEditorFn) (*WorkspacesPrReviewSettingsPatchResponse, error)
+}
+
+type AwsConnectionRequestsCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Error   interface{} `json:"error"`
+		Message struct {
+			Message AwsConnectionRequestsCreate200MessageMessage `json:"message"`
+		} `json:"message"`
+		Result  AwsConnectionRequest                  `json:"result"`
+		Success AwsConnectionRequestsCreate200Success `json:"success"`
+	}
+	JSON400 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate400ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate400Success `json:"success"`
+	}
+	JSON401 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate401ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate401Success `json:"success"`
+	}
+	JSON402 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate402ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate402Success `json:"success"`
+	}
+	JSON403 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate403ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate403Success `json:"success"`
+	}
+	JSON409 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate409ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate409Success `json:"success"`
+	}
+	JSON500 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsCreate500ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsCreate500Success `json:"success"`
+	}
+}
+type AwsConnectionRequestsCreate200MessageMessage string
+type AwsConnectionRequestsCreate200Success bool
+type AwsConnectionRequestsCreate400ErrorMessage string
+type AwsConnectionRequestsCreate400Success bool
+type AwsConnectionRequestsCreate401ErrorMessage string
+type AwsConnectionRequestsCreate401Success bool
+type AwsConnectionRequestsCreate402ErrorMessage string
+type AwsConnectionRequestsCreate402Success bool
+type AwsConnectionRequestsCreate403ErrorMessage string
+type AwsConnectionRequestsCreate403Success bool
+type AwsConnectionRequestsCreate409ErrorMessage string
+type AwsConnectionRequestsCreate409Success bool
+type AwsConnectionRequestsCreate500ErrorMessage string
+type AwsConnectionRequestsCreate500Success bool
+
+// Status returns HTTPResponse.Status
+func (r AwsConnectionRequestsCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AwsConnectionRequestsCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AwsConnectionRequestsDeleteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Error   interface{} `json:"error"`
+		Message struct {
+			Message AwsConnectionRequestsDelete200MessageMessage `json:"message"`
+		} `json:"message"`
+		Result struct {
+			// RequestId ID of the cloudformation_template
+			RequestId string `json:"requestId"`
+		} `json:"result"`
+		Success AwsConnectionRequestsDelete200Success `json:"success"`
+	}
+	JSON401 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsDelete401ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsDelete401Success `json:"success"`
+	}
+	JSON403 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsDelete403ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsDelete403Success `json:"success"`
+	}
+	JSON404 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsDelete404ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsDelete404Success `json:"success"`
+	}
+	JSON500 *struct {
+		Error struct {
+			Detail  *string                                    `json:"detail,omitempty"`
+			Message AwsConnectionRequestsDelete500ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                           `json:"message"`
+		Success AwsConnectionRequestsDelete500Success `json:"success"`
+	}
+}
+type AwsConnectionRequestsDelete200MessageMessage string
+type AwsConnectionRequestsDelete200Success bool
+type AwsConnectionRequestsDelete401ErrorMessage string
+type AwsConnectionRequestsDelete401Success bool
+type AwsConnectionRequestsDelete403ErrorMessage string
+type AwsConnectionRequestsDelete403Success bool
+type AwsConnectionRequestsDelete404ErrorMessage string
+type AwsConnectionRequestsDelete404Success bool
+type AwsConnectionRequestsDelete500ErrorMessage string
+type AwsConnectionRequestsDelete500Success bool
+
+// Status returns HTTPResponse.Status
+func (r AwsConnectionRequestsDeleteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AwsConnectionRequestsDeleteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AwsConnectionRequestsGetResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Error   interface{} `json:"error"`
+		Message struct {
+			Message AwsConnectionRequestsGet200MessageMessage `json:"message"`
+		} `json:"message"`
+		Result  AwsConnectionRequest               `json:"result"`
+		Success AwsConnectionRequestsGet200Success `json:"success"`
+	}
+	JSON401 *struct {
+		Error struct {
+			Detail  *string                                 `json:"detail,omitempty"`
+			Message AwsConnectionRequestsGet401ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                        `json:"message"`
+		Success AwsConnectionRequestsGet401Success `json:"success"`
+	}
+	JSON403 *struct {
+		Error struct {
+			Detail  *string                                 `json:"detail,omitempty"`
+			Message AwsConnectionRequestsGet403ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                        `json:"message"`
+		Success AwsConnectionRequestsGet403Success `json:"success"`
+	}
+	JSON404 *struct {
+		Error struct {
+			Detail  *string                                 `json:"detail,omitempty"`
+			Message AwsConnectionRequestsGet404ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                        `json:"message"`
+		Success AwsConnectionRequestsGet404Success `json:"success"`
+	}
+	JSON500 *struct {
+		Error struct {
+			Detail  *string                                 `json:"detail,omitempty"`
+			Message AwsConnectionRequestsGet500ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                        `json:"message"`
+		Success AwsConnectionRequestsGet500Success `json:"success"`
+	}
+}
+type AwsConnectionRequestsGet200MessageMessage string
+type AwsConnectionRequestsGet200Success bool
+type AwsConnectionRequestsGet401ErrorMessage string
+type AwsConnectionRequestsGet401Success bool
+type AwsConnectionRequestsGet403ErrorMessage string
+type AwsConnectionRequestsGet403Success bool
+type AwsConnectionRequestsGet404ErrorMessage string
+type AwsConnectionRequestsGet404Success bool
+type AwsConnectionRequestsGet500ErrorMessage string
+type AwsConnectionRequestsGet500Success bool
+
+// Status returns HTTPResponse.Status
+func (r AwsConnectionRequestsGetResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AwsConnectionRequestsGetResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type AwsConnectionsActivateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Error   interface{} `json:"error"`
+		Message struct {
+			Message AwsConnectionsActivate200MessageMessage `json:"message"`
+		} `json:"message"`
+		Result  AwsConnectionActivation          `json:"result"`
+		Success AwsConnectionsActivate200Success `json:"success"`
+	}
+	JSON400 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate400ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate400Success `json:"success"`
+	}
+	JSON401 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate401ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate401Success `json:"success"`
+	}
+	JSON402 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate402ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate402Success `json:"success"`
+	}
+	JSON403 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate403ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate403Success `json:"success"`
+	}
+	JSON409 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate409ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate409Success `json:"success"`
+	}
+	JSON500 *struct {
+		Error struct {
+			Detail  *string                               `json:"detail,omitempty"`
+			Message AwsConnectionsActivate500ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                      `json:"message"`
+		Success AwsConnectionsActivate500Success `json:"success"`
+	}
+}
+type AwsConnectionsActivate200MessageMessage string
+type AwsConnectionsActivate200Success bool
+type AwsConnectionsActivate400ErrorMessage string
+type AwsConnectionsActivate400Success bool
+type AwsConnectionsActivate401ErrorMessage string
+type AwsConnectionsActivate401Success bool
+type AwsConnectionsActivate402ErrorMessage string
+type AwsConnectionsActivate402Success bool
+type AwsConnectionsActivate403ErrorMessage string
+type AwsConnectionsActivate403Success bool
+type AwsConnectionsActivate409ErrorMessage string
+type AwsConnectionsActivate409Success bool
+type AwsConnectionsActivate500ErrorMessage string
+type AwsConnectionsActivate500Success bool
+
+// Status returns HTTPResponse.Status
+func (r AwsConnectionsActivateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AwsConnectionsActivateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CloudAccountsDisconnectResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Error   interface{} `json:"error"`
+		Message struct {
+			Message CloudAccountsDisconnect200MessageMessage `json:"message"`
+		} `json:"message"`
+		Result struct {
+			UnderscoreObject CloudAccountsDisconnect200ResultObject `json:"_object"`
+
+			// Id ID of the cloud_account
+			Id string `json:"id"`
+		} `json:"result"`
+		Success CloudAccountsDisconnect200Success `json:"success"`
+	}
+	JSON401 *struct {
+		Error struct {
+			Detail  *string                                `json:"detail,omitempty"`
+			Message CloudAccountsDisconnect401ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                       `json:"message"`
+		Success CloudAccountsDisconnect401Success `json:"success"`
+	}
+	JSON403 *struct {
+		Error struct {
+			Detail  *string                                `json:"detail,omitempty"`
+			Message CloudAccountsDisconnect403ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                       `json:"message"`
+		Success CloudAccountsDisconnect403Success `json:"success"`
+	}
+	JSON404 *struct {
+		Error struct {
+			Detail  *string                                `json:"detail,omitempty"`
+			Message CloudAccountsDisconnect404ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                       `json:"message"`
+		Success CloudAccountsDisconnect404Success `json:"success"`
+	}
+	JSON500 *struct {
+		Error struct {
+			Detail  *string                                `json:"detail,omitempty"`
+			Message CloudAccountsDisconnect500ErrorMessage `json:"message"`
+		} `json:"error"`
+		Message interface{}                       `json:"message"`
+		Success CloudAccountsDisconnect500Success `json:"success"`
+	}
+}
+type CloudAccountsDisconnect200MessageMessage string
+type CloudAccountsDisconnect200ResultObject string
+type CloudAccountsDisconnect200Success bool
+type CloudAccountsDisconnect401ErrorMessage string
+type CloudAccountsDisconnect401Success bool
+type CloudAccountsDisconnect403ErrorMessage string
+type CloudAccountsDisconnect403Success bool
+type CloudAccountsDisconnect404ErrorMessage string
+type CloudAccountsDisconnect404Success bool
+type CloudAccountsDisconnect500ErrorMessage string
+type CloudAccountsDisconnect500Success bool
+
+// Status returns HTTPResponse.Status
+func (r CloudAccountsDisconnectResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CloudAccountsDisconnectResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type TeamsPostResponse struct {
@@ -4926,6 +5758,67 @@ func (r WorkspacesPrReviewSettingsPatchResponse) StatusCode() int {
 	return 0
 }
 
+// AwsConnectionRequestsCreateWithBodyWithResponse request with arbitrary body returning *AwsConnectionRequestsCreateResponse
+func (c *ClientWithResponses) AwsConnectionRequestsCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsCreateResponse, error) {
+	rsp, err := c.AwsConnectionRequestsCreateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionRequestsCreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) AwsConnectionRequestsCreateWithResponse(ctx context.Context, body AwsConnectionRequestsCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsCreateResponse, error) {
+	rsp, err := c.AwsConnectionRequestsCreate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionRequestsCreateResponse(rsp)
+}
+
+// AwsConnectionRequestsDeleteWithResponse request returning *AwsConnectionRequestsDeleteResponse
+func (c *ClientWithResponses) AwsConnectionRequestsDeleteWithResponse(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsDeleteResponse, error) {
+	rsp, err := c.AwsConnectionRequestsDelete(ctx, workspaceId, requestId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionRequestsDeleteResponse(rsp)
+}
+
+// AwsConnectionRequestsGetWithResponse request returning *AwsConnectionRequestsGetResponse
+func (c *ClientWithResponses) AwsConnectionRequestsGetWithResponse(ctx context.Context, workspaceId string, requestId string, reqEditors ...RequestEditorFn) (*AwsConnectionRequestsGetResponse, error) {
+	rsp, err := c.AwsConnectionRequestsGet(ctx, workspaceId, requestId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionRequestsGetResponse(rsp)
+}
+
+// AwsConnectionsActivateWithBodyWithResponse request with arbitrary body returning *AwsConnectionsActivateResponse
+func (c *ClientWithResponses) AwsConnectionsActivateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AwsConnectionsActivateResponse, error) {
+	rsp, err := c.AwsConnectionsActivateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionsActivateResponse(rsp)
+}
+
+func (c *ClientWithResponses) AwsConnectionsActivateWithResponse(ctx context.Context, body AwsConnectionsActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*AwsConnectionsActivateResponse, error) {
+	rsp, err := c.AwsConnectionsActivate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAwsConnectionsActivateResponse(rsp)
+}
+
+// CloudAccountsDisconnectWithResponse request returning *CloudAccountsDisconnectResponse
+func (c *ClientWithResponses) CloudAccountsDisconnectWithResponse(ctx context.Context, workspaceId string, id string, reqEditors ...RequestEditorFn) (*CloudAccountsDisconnectResponse, error) {
+	rsp, err := c.CloudAccountsDisconnect(ctx, workspaceId, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCloudAccountsDisconnectResponse(rsp)
+}
+
 // TeamsPostWithBodyWithResponse request with arbitrary body returning *TeamsPostResponse
 func (c *ClientWithResponses) TeamsPostWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TeamsPostResponse, error) {
 	rsp, err := c.TeamsPostWithBody(ctx, contentType, body, reqEditors...)
@@ -5254,6 +6147,515 @@ func (c *ClientWithResponses) WorkspacesPrReviewSettingsPatchWithResponse(ctx co
 		return nil, err
 	}
 	return ParseWorkspacesPrReviewSettingsPatchResponse(rsp)
+}
+
+// ParseAwsConnectionRequestsCreateResponse parses an HTTP response from a AwsConnectionRequestsCreateWithResponse call
+func ParseAwsConnectionRequestsCreateResponse(rsp *http.Response) (*AwsConnectionRequestsCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AwsConnectionRequestsCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Error   interface{} `json:"error"`
+			Message struct {
+				Message AwsConnectionRequestsCreate200MessageMessage `json:"message"`
+			} `json:"message"`
+			Result  AwsConnectionRequest                  `json:"result"`
+			Success AwsConnectionRequestsCreate200Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate400ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate400Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate401ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate401Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 402:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate402ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate402Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON402 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate403ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate403Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate409ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate409Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsCreate500ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsCreate500Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAwsConnectionRequestsDeleteResponse parses an HTTP response from a AwsConnectionRequestsDeleteWithResponse call
+func ParseAwsConnectionRequestsDeleteResponse(rsp *http.Response) (*AwsConnectionRequestsDeleteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AwsConnectionRequestsDeleteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Error   interface{} `json:"error"`
+			Message struct {
+				Message AwsConnectionRequestsDelete200MessageMessage `json:"message"`
+			} `json:"message"`
+			Result struct {
+				// RequestId ID of the cloudformation_template
+				RequestId string `json:"requestId"`
+			} `json:"result"`
+			Success AwsConnectionRequestsDelete200Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsDelete401ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsDelete401Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsDelete403ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsDelete403Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsDelete404ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsDelete404Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest struct {
+			Error struct {
+				Detail  *string                                    `json:"detail,omitempty"`
+				Message AwsConnectionRequestsDelete500ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                           `json:"message"`
+			Success AwsConnectionRequestsDelete500Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAwsConnectionRequestsGetResponse parses an HTTP response from a AwsConnectionRequestsGetWithResponse call
+func ParseAwsConnectionRequestsGetResponse(rsp *http.Response) (*AwsConnectionRequestsGetResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AwsConnectionRequestsGetResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Error   interface{} `json:"error"`
+			Message struct {
+				Message AwsConnectionRequestsGet200MessageMessage `json:"message"`
+			} `json:"message"`
+			Result  AwsConnectionRequest               `json:"result"`
+			Success AwsConnectionRequestsGet200Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest struct {
+			Error struct {
+				Detail  *string                                 `json:"detail,omitempty"`
+				Message AwsConnectionRequestsGet401ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                        `json:"message"`
+			Success AwsConnectionRequestsGet401Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest struct {
+			Error struct {
+				Detail  *string                                 `json:"detail,omitempty"`
+				Message AwsConnectionRequestsGet403ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                        `json:"message"`
+			Success AwsConnectionRequestsGet403Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Error struct {
+				Detail  *string                                 `json:"detail,omitempty"`
+				Message AwsConnectionRequestsGet404ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                        `json:"message"`
+			Success AwsConnectionRequestsGet404Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest struct {
+			Error struct {
+				Detail  *string                                 `json:"detail,omitempty"`
+				Message AwsConnectionRequestsGet500ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                        `json:"message"`
+			Success AwsConnectionRequestsGet500Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAwsConnectionsActivateResponse parses an HTTP response from a AwsConnectionsActivateWithResponse call
+func ParseAwsConnectionsActivateResponse(rsp *http.Response) (*AwsConnectionsActivateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AwsConnectionsActivateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Error   interface{} `json:"error"`
+			Message struct {
+				Message AwsConnectionsActivate200MessageMessage `json:"message"`
+			} `json:"message"`
+			Result  AwsConnectionActivation          `json:"result"`
+			Success AwsConnectionsActivate200Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate400ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate400Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate401ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate401Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 402:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate402ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate402Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON402 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate403ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate403Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate409ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate409Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest struct {
+			Error struct {
+				Detail  *string                               `json:"detail,omitempty"`
+				Message AwsConnectionsActivate500ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                      `json:"message"`
+			Success AwsConnectionsActivate500Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCloudAccountsDisconnectResponse parses an HTTP response from a CloudAccountsDisconnectWithResponse call
+func ParseCloudAccountsDisconnectResponse(rsp *http.Response) (*CloudAccountsDisconnectResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CloudAccountsDisconnectResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Error   interface{} `json:"error"`
+			Message struct {
+				Message CloudAccountsDisconnect200MessageMessage `json:"message"`
+			} `json:"message"`
+			Result struct {
+				UnderscoreObject CloudAccountsDisconnect200ResultObject `json:"_object"`
+
+				// Id ID of the cloud_account
+				Id string `json:"id"`
+			} `json:"result"`
+			Success CloudAccountsDisconnect200Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest struct {
+			Error struct {
+				Detail  *string                                `json:"detail,omitempty"`
+				Message CloudAccountsDisconnect401ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                       `json:"message"`
+			Success CloudAccountsDisconnect401Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest struct {
+			Error struct {
+				Detail  *string                                `json:"detail,omitempty"`
+				Message CloudAccountsDisconnect403ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                       `json:"message"`
+			Success CloudAccountsDisconnect403Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Error struct {
+				Detail  *string                                `json:"detail,omitempty"`
+				Message CloudAccountsDisconnect404ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                       `json:"message"`
+			Success CloudAccountsDisconnect404Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest struct {
+			Error struct {
+				Detail  *string                                `json:"detail,omitempty"`
+				Message CloudAccountsDisconnect500ErrorMessage `json:"message"`
+			} `json:"error"`
+			Message interface{}                       `json:"message"`
+			Success CloudAccountsDisconnect500Success `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseTeamsPostResponse parses an HTTP response from a TeamsPostWithResponse call

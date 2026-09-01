@@ -7,6 +7,11 @@ generate:
   client: true
 output-options:
   include-operation-ids:
+    - aws_connection_requests.create
+    - aws_connection_requests.get
+    - aws_connection_requests.delete
+    - aws_connections.activate
+    - cloud_accounts.disconnect
     - workspaces.get
     - workspaces.patch
     - workspaces.autofix_settings.get
