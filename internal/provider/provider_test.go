@@ -79,8 +79,26 @@ func TestProviderServerSchema(t *testing.T) {
 		}
 	}
 
-	if len(resp.ResourceSchemas) != 0 {
-		t.Errorf("expected no resources in the skeleton provider, got %d", len(resp.ResourceSchemas))
+	resourceNames := []string{
+		"polylane_team",
+		"polylane_team_member",
+		"polylane_workspace",
+		"polylane_workspace_member",
+		"polylane_workspace_autofix_settings",
+		"polylane_workspace_digest_settings",
+		"polylane_workspace_investigation_limits_settings",
+		"polylane_workspace_investigations_settings",
+		"polylane_workspace_model_training_settings",
+		"polylane_workspace_observability_settings",
+		"polylane_workspace_pr_review_settings",
+	}
+	if len(resp.ResourceSchemas) != len(resourceNames) {
+		t.Fatalf("unexpected resource schema count: got %d, want %d", len(resp.ResourceSchemas), len(resourceNames))
+	}
+	for _, name := range resourceNames {
+		if _, ok := resp.ResourceSchemas[name]; !ok {
+			t.Errorf("provider schema is missing resource %q", name)
+		}
 	}
 	if len(resp.DataSourceSchemas) != 0 {
 		t.Errorf("expected no data sources in the skeleton provider, got %d", len(resp.DataSourceSchemas))

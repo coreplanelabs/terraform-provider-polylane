@@ -3,23 +3,18 @@ package provider
 import (
 	"context"
 	"os"
+	"strings"
 
+	"github.com/coreplanelabs/terraform-provider-polylane/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const defaultEndpoint = "https://api.polylane.io/api/v1"
-
-// providerConfig carries provider-level configuration to resources and data
-// sources via ConfigureResponse.ResourceData / DataSourceData. The Polylane
-// API client will live here once it exists.
-type providerConfig struct {
-	APIKey   string
-	Endpoint string
-}
+const defaultEndpoint = "https://api.polylane.com/v1"
 
 type polylaneProvider struct {
 	version string
@@ -45,16 +40,16 @@ func (p *polylaneProvider) Metadata(_ context.Context, _ provider.MetadataReques
 
 func (p *polylaneProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Terraform provider for Polylane.",
+		Description: "Manage an existing Polylane workspace, members, teams, and workspace-level settings.",
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
 				Optional:    true,
 				Sensitive:   true,
-				Description: "Polylane API key. May also be set with POLYLANE_API_KEY.",
+				Description: "Polylane workspace API key. May also be set with the POLYLANE_API_KEY environment variable.",
 			},
 			"endpoint": schema.StringAttribute{
 				Optional:    true,
-				Description: "Polylane API endpoint. May also be set with POLYLANE_ENDPOINT.",
+				Description: "Polylane API base endpoint, including the API version path. Defaults to https://api.polylane.com/v1. May also be set with the POLYLANE_ENDPOINT environment variable.",
 			},
 		},
 	}
@@ -67,33 +62,73 @@ func (p *polylaneProvider) Configure(ctx context.Context, req provider.Configure
 		return
 	}
 
-	apiKey := os.Getenv("POLYLANE_API_KEY")
-	if !config.APIKey.IsNull() {
-		apiKey = config.APIKey.ValueString()
+	if config.APIKey.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Unknown Polylane API Key",
+			"The provider cannot create an API client because api_key is unknown. Use a known value or the POLYLANE_API_KEY environment variable.",
+		)
+		return
 	}
 
-	endpoint := os.Getenv("POLYLANE_ENDPOINT")
+	apiKey := strings.TrimSpace(os.Getenv("POLYLANE_API_KEY"))
+	if !config.APIKey.IsNull() {
+		apiKey = strings.TrimSpace(config.APIKey.ValueString())
+	}
+	if apiKey == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Missing Polylane API Key",
+			"Set api_key in the provider configuration or set the POLYLANE_API_KEY environment variable.",
+		)
+		return
+	}
+
+	if config.Endpoint.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("endpoint"),
+			"Unknown Polylane API Endpoint",
+			"The provider cannot create an API client because endpoint is unknown. Use a known value or the POLYLANE_ENDPOINT environment variable.",
+		)
+		return
+	}
+
+	endpoint := strings.TrimSpace(os.Getenv("POLYLANE_ENDPOINT"))
 	if !config.Endpoint.IsNull() {
-		endpoint = config.Endpoint.ValueString()
+		endpoint = strings.TrimSpace(config.Endpoint.ValueString())
 	}
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
 
-	// No resources or data sources exist yet, so an API key is not required.
-	// Once the Polylane API client lands, construct it here and fail with an
-	// attribute error when the key is missing.
-	cfg := &providerConfig{
-		APIKey:   apiKey,
-		Endpoint: endpoint,
+	apiClient, err := client.New(apiKey, endpoint, p.version, nil)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("endpoint"),
+			"Invalid Polylane API Endpoint",
+			err.Error(),
+		)
+		return
 	}
 
-	resp.DataSourceData = cfg
-	resp.ResourceData = cfg
+	resp.DataSourceData = apiClient
+	resp.ResourceData = apiClient
 }
 
 func (p *polylaneProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewWorkspaceResource,
+		NewWorkspaceMemberResource,
+		NewTeamResource,
+		NewTeamMemberResource,
+		NewWorkspaceAutofixSettingsResource,
+		NewWorkspaceDigestSettingsResource,
+		NewWorkspaceInvestigationsSettingsResource,
+		NewWorkspaceInvestigationLimitsSettingsResource,
+		NewWorkspaceModelTrainingSettingsResource,
+		NewWorkspaceObservabilitySettingsResource,
+		NewWorkspacePRReviewSettingsResource,
+	}
 }
 
 func (p *polylaneProvider) DataSources(_ context.Context) []func() datasource.DataSource {
