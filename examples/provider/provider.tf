@@ -10,10 +10,5 @@ terraform {
 }
 
 provider "polylane" {
-  api_key = var.polylane_api_key
-}
-
-variable "polylane_api_key" {
-  type      = string
-  sensitive = true
+  # Prefer POLYLANE_API_KEY so the key is not written in configuration.
 }

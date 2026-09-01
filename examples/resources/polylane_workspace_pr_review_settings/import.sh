@@ -1,0 +1,1 @@
+terraform import polylane_workspace_pr_review_settings.current ws_00000000000000000000000000000000

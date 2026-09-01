@@ -1,0 +1,1 @@
+terraform import polylane_workspace.current ws_00000000000000000000000000000000

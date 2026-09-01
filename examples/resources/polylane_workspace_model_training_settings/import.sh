@@ -1,0 +1,1 @@
+terraform import polylane_workspace_model_training_settings.current ws_00000000000000000000000000000000
