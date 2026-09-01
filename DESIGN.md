@@ -32,6 +32,25 @@ but never recreate.
 also has a complete create, read, and delete lifecycle. Composite imports use
 slash-separated IDs such as `workspace_id/team_id/user_id`.
 
+AWS onboarding uses two Polylane resources so Terraform can preserve a valid
+dependency graph while the customer retains ownership of every AWS object.
+`polylane_aws_connection_request` creates an idempotent pending handshake and
+returns the Polylane-issued external ID, trusted AWS principal, and HTTPS
+subscription endpoint. It completes before the customer-managed IAM role, S3
+bucket, SNS topic and subscription, and CloudTrail trail are created.
+`polylane_aws_connection` then consumes those AWS identifiers, validates the
+connection, and records the real Polylane cloud account. Trying to export the
+handshake values and wait for the final cloud account from one resource would
+deadlock because the AWS resources are downstream of those values.
+
+Both resources manage Polylane API objects only. They do not configure an AWS
+client or accept AWS credentials. The connection uses the main application's
+customer-managed mode, which validates supplied infrastructure without making
+AWS mutation calls. Destroy deregisters the connection but never deletes a
+CloudFormation stack or another AWS object. Initial inventory synchronization
+continues asynchronously after registration and is intentionally not part of
+Terraform's create success condition.
+
 The workspace resource excludes custom LLM provider configuration and all
 credential values. Terraform Plugin Framework supports write-only arguments in
 Terraform 1.11 and later, but adding a secret is still a product and lifecycle

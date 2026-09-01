@@ -1,5 +1,51 @@
 package client
 
+type AWSConnectionRequest struct {
+	ID                   string   `json:"id"`
+	WorkspaceID          string   `json:"workspaceId"`
+	AccountID            string   `json:"account"`
+	Regions              []string `json:"regions"`
+	ExternalID           string   `json:"externalId"`
+	PrincipalARN         string   `json:"principalArn"`
+	SubscriptionEndpoint string   `json:"subscriptionEndpoint"`
+	CloudAccountID       string   `json:"cloudAccountId"`
+	Region               string   `json:"region"`
+	Status               string   `json:"status"`
+}
+
+type CreateAWSConnectionRequestInput struct {
+	WorkspaceID    string
+	AccountID      string
+	Regions        []string
+	IdempotencyKey string
+}
+
+type AWSConnection struct {
+	ID                   string   `json:"id"`
+	WorkspaceID          string   `json:"workspaceId"`
+	RequestID            string   `json:"requestId"`
+	AccountID            string   `json:"account"`
+	Regions              []string `json:"regions"`
+	Region               string   `json:"region"`
+	RoleARN              string   `json:"roleArn"`
+	BucketName           string   `json:"bucketName"`
+	TopicARN             string   `json:"topicArn"`
+	TopicSubscriptionARN string   `json:"topicSubscriptionArn"`
+	CloudTrailName       string   `json:"cloudTrailName"`
+	Status               string   `json:"status"`
+}
+
+type ActivateAWSConnectionInput struct {
+	WorkspaceID          string
+	RequestID            string
+	Region               string
+	RoleARN              string
+	BucketName           string
+	TopicARN             string
+	TopicSubscriptionARN string
+	CloudTrailName       string
+}
+
 type Workspace struct {
 	ID              string  `json:"id"`
 	Name            string  `json:"name"`

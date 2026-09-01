@@ -1,6 +1,72 @@
 {
   "components": {
     "schemas": {
+      "ActivateAwsConnection": {
+        "additionalProperties": false,
+        "properties": {
+          "bucketName": {
+            "example": "acme-cloudtrail-logs",
+            "maxLength": 63,
+            "minLength": 3,
+            "type": "string"
+          },
+          "cloudTrailName": {
+            "example": "polylane-cloudtrail",
+            "maxLength": 128,
+            "minLength": 3,
+            "type": "string"
+          },
+          "region": {
+            "description": "AWS region",
+            "example": "us-east-1",
+            "pattern": "^[a-z]{2}(?:-gov)?-[a-z]+-\\d$",
+            "type": "string"
+          },
+          "requestId": {
+            "description": "ID of the cloudformation_template",
+            "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+            "pattern": "^cloudformation_[0-9a-z]{24}$",
+            "type": "string"
+          },
+          "roleArn": {
+            "example": "arn:aws:iam::123456789012:role/polylane-read",
+            "maxLength": 2048,
+            "minLength": 20,
+            "pattern": "^arn:(?:aws|aws-us-gov|aws-cn):iam::\\d{12}:role\\/.+$",
+            "type": "string"
+          },
+          "topicArn": {
+            "example": "arn:aws:sns:us-east-1:123456789012:polylane-cloudtrail",
+            "maxLength": 2048,
+            "pattern": "^arn:(?:aws|aws-us-gov|aws-cn):sns:[a-z0-9-]+:\\d{12}:[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "topicSubscriptionArn": {
+            "description": "Confirmed HTTPS subscription ARN for the request's subscriptionEndpoint",
+            "example": "arn:aws:sns:us-east-1:123456789012:polylane-cloudtrail:12345678-1234-1234-1234-123456789012",
+            "maxLength": 2048,
+            "pattern": "^arn:(?:aws|aws-us-gov|aws-cn):sns:[a-z0-9-]+:\\d{12}:[A-Za-z0-9_-]+:[0-9a-f-]{36}$",
+            "type": "string"
+          },
+          "workspaceId": {
+            "description": "ID of the workspace",
+            "example": "ws_rii32455qptezc7467usm3f3hq31qkwp",
+            "pattern": "^ws_[0-9a-z]{32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspaceId",
+          "requestId",
+          "roleArn",
+          "bucketName",
+          "topicArn",
+          "topicSubscriptionArn",
+          "cloudTrailName",
+          "region"
+        ],
+        "type": "object"
+      },
       "AdminCheckRunWithSignals": {
         "allOf": [
           {
@@ -11238,6 +11304,129 @@
         ],
         "type": "object"
       },
+      "AwsConnectionActivation": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudAccountId": {
+            "description": "ID of the cloud_account",
+            "example": "acc_34gky74ibc92h8t2efn8csrh",
+            "pattern": "^acc_[0-9a-z]{24}$",
+            "type": "string"
+          },
+          "provisioningStatus": {
+            "description": "Registration is durable and initial sync has been queued; this does not mean initial sync is complete.",
+            "enum": [
+              "registered"
+            ],
+            "type": "string"
+          },
+          "requestId": {
+            "description": "ID of the cloudformation_template",
+            "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+            "pattern": "^cloudformation_[0-9a-z]{24}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId",
+          "cloudAccountId",
+          "provisioningStatus"
+        ],
+        "type": "object"
+      },
+      "AwsConnectionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "awsAccountId": {
+            "description": "Twelve-digit AWS account ID",
+            "example": "123456789012",
+            "pattern": "^\\d{12}$",
+            "type": "string"
+          },
+          "cloudAccountId": {
+            "description": "ID of the cloud_account",
+            "example": "acc_34gky74ibc92h8t2efn8csrh",
+            "nullable": true,
+            "pattern": "^acc_[0-9a-z]{24}$",
+            "type": "string"
+          },
+          "externalId": {
+            "description": "External ID required when Polylane assumes the customer role",
+            "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+            "pattern": "^cloudformation_[0-9a-z]{24}$",
+            "type": "string"
+          },
+          "region": {
+            "description": "Handshake region where the CloudTrail trail and SNS topic must live",
+            "example": "us-east-1",
+            "pattern": "^[a-z]{2}(?:-gov)?-[a-z]+-\\d$",
+            "type": "string"
+          },
+          "regions": {
+            "items": {
+              "description": "AWS region",
+              "example": "us-east-1",
+              "pattern": "^[a-z]{2}(?:-gov)?-[a-z]+-\\d$",
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "requestId": {
+            "description": "ID of the cloudformation_template",
+            "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+            "pattern": "^cloudformation_[0-9a-z]{24}$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "registered"
+            ],
+            "type": "string"
+          },
+          "subscriptionEndpoint": {
+            "description": "HTTPS endpoint the customer-managed SNS subscription must target",
+            "format": "uri",
+            "type": "string"
+          },
+          "trustedPrincipal": {
+            "$ref": "#/components/schemas/AwsTrustedPrincipal"
+          }
+        },
+        "required": [
+          "requestId",
+          "externalId",
+          "awsAccountId",
+          "region",
+          "regions",
+          "trustedPrincipal",
+          "subscriptionEndpoint",
+          "status",
+          "cloudAccountId"
+        ],
+        "type": "object"
+      },
+      "AwsTrustedPrincipal": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "description": "Polylane AWS account ID",
+            "example": "123456789012",
+            "pattern": "^\\d{12}$",
+            "type": "string"
+          },
+          "arn": {
+            "description": "AWS principal ARN to place in the customer role trust policy",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId",
+          "arn"
+        ],
+        "type": "object"
+      },
       "Calculation": {
         "additionalProperties": false,
         "properties": {
@@ -12420,6 +12609,13 @@
                   "cloudTrailName": {
                     "type": "string"
                   },
+                  "connectionMode": {
+                    "enum": [
+                      "cloudformation",
+                      "customer_managed"
+                    ],
+                    "type": "string"
+                  },
                   "createMonitoringAlarms": {
                     "nullable": true,
                     "type": "string"
@@ -12460,8 +12656,6 @@
                   "provider",
                   "roleArn",
                   "externalParameter",
-                  "stackName",
-                  "serviceToken",
                   "bucketName",
                   "topicArn",
                   "cloudTrailName",
@@ -13413,6 +13607,51 @@
         "required": [
           "workspaceId",
           "templateSlug"
+        ],
+        "type": "object"
+      },
+      "CreateAwsConnectionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "awsAccountId": {
+            "description": "Twelve-digit AWS account ID",
+            "example": "123456789012",
+            "pattern": "^\\d{12}$",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "Opaque caller-stable idempotency key. Reusing it with identical account and regions returns the same request; reusing it with different inputs returns 409.",
+            "example": "terraform:workspace_abc:123456789012:all-regions",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]+$",
+            "type": "string"
+          },
+          "regions": {
+            "description": "Regions Polylane may scan. Null means every enabled region.",
+            "items": {
+              "description": "AWS region",
+              "example": "us-east-1",
+              "pattern": "^[a-z]{2}(?:-gov)?-[a-z]+-\\d$",
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "nullable": true,
+            "type": "array"
+          },
+          "workspaceId": {
+            "description": "ID of the workspace",
+            "example": "ws_rii32455qptezc7467usm3f3hq31qkwp",
+            "pattern": "^ws_[0-9a-z]{32}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspaceId",
+          "idempotencyKey",
+          "awsAccountId",
+          "regions"
         ],
         "type": "object"
       },
@@ -19786,7 +20025,7 @@
           },
           "created": {
             "description": "When the client was created",
-            "example": "2026-09-01T15:20:57.844Z",
+            "example": "2026-09-01T17:30:08.946Z",
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -19938,7 +20177,7 @@
           },
           "updated": {
             "description": "When the client was last updated",
-            "example": "2026-09-01T15:20:57.844Z",
+            "example": "2026-09-01T17:30:08.947Z",
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -58976,6 +59215,1168 @@
         "summary": "Replace an automation",
         "tags": [
           "Automations"
+        ]
+      }
+    },
+    "/v1/aws_connection_requests": {
+      "post": {
+        "operationId": "aws_connection_requests.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAwsConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "nullable": true
+                    },
+                    "message": {
+                      "properties": {
+                        "message": {
+                          "enum": [
+                            "Successful request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "result": {
+                      "$ref": "#/components/schemas/AwsConnectionRequest"
+                    },
+                    "success": {
+                      "enum": [
+                        true
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "success",
+                    "error",
+                    "result"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Bad Request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Unauthorized"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Payment Required"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment Required"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Forbidden"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Conflict"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Internal error"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Create an idempotent customer-managed AWS connection request",
+        "tags": [
+          "AWS Connections"
+        ]
+      }
+    },
+    "/v1/aws_connection_requests/{workspaceId}/{requestId}": {
+      "delete": {
+        "operationId": "aws_connection_requests.delete",
+        "parameters": [
+          {
+            "description": "ID of the workspace",
+            "in": "path",
+            "name": "workspaceId",
+            "required": true,
+            "schema": {
+              "description": "ID of the workspace",
+              "example": "ws_rii32455qptezc7467usm3f3hq31qkwp",
+              "pattern": "^ws_[0-9a-z]{32}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the cloudformation_template",
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "description": "ID of the cloudformation_template",
+              "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+              "pattern": "^cloudformation_[0-9a-z]{24}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "nullable": true
+                    },
+                    "message": {
+                      "properties": {
+                        "message": {
+                          "enum": [
+                            "Successful request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "result": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "requestId": {
+                          "description": "ID of the cloudformation_template",
+                          "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+                          "pattern": "^cloudformation_[0-9a-z]{24}$",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "requestId"
+                      ],
+                      "type": "object"
+                    },
+                    "success": {
+                      "enum": [
+                        true
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "success",
+                    "error",
+                    "result"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Unauthorized"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Forbidden"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Not found"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Internal error"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Delete a customer-managed AWS connection request",
+        "tags": [
+          "AWS Connections"
+        ]
+      },
+      "get": {
+        "operationId": "aws_connection_requests.get",
+        "parameters": [
+          {
+            "description": "ID of the workspace",
+            "in": "path",
+            "name": "workspaceId",
+            "required": true,
+            "schema": {
+              "description": "ID of the workspace",
+              "example": "ws_rii32455qptezc7467usm3f3hq31qkwp",
+              "pattern": "^ws_[0-9a-z]{32}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the cloudformation_template",
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "description": "ID of the cloudformation_template",
+              "example": "cloudformation_38mg3o4ibc92h8t2efn8csrh",
+              "pattern": "^cloudformation_[0-9a-z]{24}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "nullable": true
+                    },
+                    "message": {
+                      "properties": {
+                        "message": {
+                          "enum": [
+                            "Successful request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "result": {
+                      "$ref": "#/components/schemas/AwsConnectionRequest"
+                    },
+                    "success": {
+                      "enum": [
+                        true
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "success",
+                    "error",
+                    "result"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Unauthorized"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Forbidden"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Not found"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Internal error"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Get a customer-managed AWS connection request",
+        "tags": [
+          "AWS Connections"
+        ]
+      }
+    },
+    "/v1/aws_connections": {
+      "post": {
+        "operationId": "aws_connections.activate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateAwsConnection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "nullable": true
+                    },
+                    "message": {
+                      "properties": {
+                        "message": {
+                          "enum": [
+                            "Successful request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "result": {
+                      "$ref": "#/components/schemas/AwsConnectionActivation"
+                    },
+                    "success": {
+                      "enum": [
+                        true
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "success",
+                    "error",
+                    "result"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Bad Request"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Unauthorized"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Payment Required"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment Required"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Forbidden"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Conflict"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "detail": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "enum": [
+                            "Internal error"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "message": {
+                      "nullable": true
+                    },
+                    "success": {
+                      "enum": [
+                        false
+                      ],
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "success",
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Validate and register customer-managed AWS resources",
+        "tags": [
+          "AWS Connections"
         ]
       }
     },
