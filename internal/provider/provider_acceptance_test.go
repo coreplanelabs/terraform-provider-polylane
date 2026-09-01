@@ -31,7 +31,7 @@ func testAccWorkspacePreCheck(t *testing.T) {
 	testAccPreCheck(t)
 
 	if os.Getenv("POLYLANE_WORKSPACE_ID") == "" {
-		t.Fatal("POLYLANE_WORKSPACE_ID must be set for workspace acceptance tests")
+		t.Skip("POLYLANE_WORKSPACE_ID is not set; skipping live workspace acceptance test")
 	}
 }
 

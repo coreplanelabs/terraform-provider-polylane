@@ -35,6 +35,14 @@ env:
 jobs:
   acceptance:
     runs-on: ubuntu-24.04
+    env:
+      # Pull requests always exercise the provider protocol with a harmless
+      # smoke key. When repository secrets are configured, the same workflow
+      # also runs the read-only UAT imports. Mutating team tests remain opt-in.
+      POLYLANE_API_KEY: ${{ secrets.POLYLANE_API_KEY || 'acceptance-smoke-key' }}
+      POLYLANE_ENDPOINT: ${{ secrets.POLYLANE_ENDPOINT }}
+      POLYLANE_WORKSPACE_ID: ${{ secrets.POLYLANE_WORKSPACE_ID }}
+      POLYLANE_TEAM_ACCEPTANCE: ${{ secrets.POLYLANE_TEAM_ACCEPTANCE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -44,9 +52,5 @@ jobs:
         with:
           cache: "true"
 
-      # The provider has no live API surface yet, so the acceptance suite is a
-      # provider-level smoke test and runs unconditionally. Once Polylane API
-      # resources land, gate mutating runs behind a `live-acceptance` PR label
-      # and a POLYLANE_API_KEY repository secret.
       - name: Run acceptance tests
         run: task test:acc
