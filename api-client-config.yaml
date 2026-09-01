@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
+package: generated
+output: internal/client/generated/api.gen.go
+generate:
+  models: true
+  client: true
+output-options:
+  include-operation-ids:
+    - workspaces.get
+    - workspaces.patch
+    - workspaces.autofix_settings.get
+    - workspaces.autofix_settings.patch
+    - workspaces.digest_settings.get
+    - workspaces.digest_settings.patch
+    - workspaces.investigation_limits_settings.get
+    - workspaces.investigation_limits_settings.patch
+    - workspaces.investigations_settings.get
+    - workspaces.investigations_settings.patch
+    - workspaces.observability_settings.get
+    - workspaces.observability_settings.patch
+    - workspaces.pr_review_settings.get
+    - workspaces.pr_review_settings.patch
+    - workspace_members.list
+    - workspace_members.get
+    - workspace_member.patch
+    - workspace_members.del
+    - teams.post
+    - teams.list
+    - teams.get
+    - teams.patch
+    - teams.del
+    - team_members.post
+    - team_members.list
+    - team_members.del

@@ -22,6 +22,7 @@ tasks:
   do:
     desc: "Run all quality checks"
     cmds:
+      - task: generate
       - task: format
       - task: lint
       - task: examples:validate
@@ -35,6 +36,22 @@ tasks:
     cmds:
       - go mod download
       - tflint --init
+
+  generate:
+    desc: "Generate the scoped Polylane API client from the checked-in OpenAPI spec"
+    cmds:
+      - go generate ./...
+
+  generate:check:
+    desc: "Verify that the checked-in API client matches the OpenAPI spec"
+    cmds:
+      - task: generate
+      - git diff --exit-code -- internal/client/generated/api.gen.go
+
+  sync:openapi:
+    desc: "Download the production OpenAPI spec, normalize it, regenerate the client, and test"
+    cmds:
+      - ./scripts/sync-openapi.sh
 
   format:
     desc: "Format Go and Terraform/OpenTofu files"

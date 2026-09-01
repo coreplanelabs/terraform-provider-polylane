@@ -23,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         task:
+          - generate:check
           - format
           - lint
           - examples:validate
