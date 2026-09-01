@@ -1,0 +1,1 @@
+terraform import polylane_workspace_investigations_settings.current ws_00000000000000000000000000000000

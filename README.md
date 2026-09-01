@@ -1,9 +1,18 @@
 # Terraform Provider for Polylane
 
-This repository contains a Terraform (and OpenTofu) provider for Polylane.
+This repository contains the official Terraform (and OpenTofu) provider for
+Polylane. The initial provider intentionally covers a small workspace-level
+surface:
 
-The provider is currently a scaffold: build, lint, test, docs, and release
-tooling are in place, but no resources or data sources are implemented yet.
+- adopting an existing workspace;
+- adopting existing workspace members and managing their roles and scopes;
+- managing teams and team membership;
+- managing autofix, digest, investigation, investigation-limit, model-training,
+  observability, and pull-request-review settings.
+
+Workspace creation and destructive deletion are intentionally not supported.
+Integration credentials and custom model provider credentials are also outside
+the initial scope so they never need to be stored in Terraform state.
 
 Once published, the provider is sourced as `coreplanelabs/polylane`:
 
@@ -18,6 +27,25 @@ terraform {
 }
 ```
 
+Configure authentication with `POLYLANE_API_KEY`, then adopt a workspace with an
+import block:
+
+```hcl
+provider "polylane" {}
+
+resource "polylane_workspace" "current" {}
+
+import {
+  to = polylane_workspace.current
+  id = "ws_00000000000000000000000000000000"
+}
+```
+
+Removing an adopted workspace, workspace member, or workspace settings resource
+from Terraform configuration stops Terraform management. It does not delete or
+reset the adopted object in Polylane. Teams and team memberships are normal
+lifecycle resources and are deleted when removed from configuration.
+
 Generated provider documentation lives in [docs/](docs/) and is published on the
 Terraform Registry.
 
@@ -29,6 +57,22 @@ task init
 task do
 ```
 
+### API client generation
+
+The provider checks in the production OpenAPI document and a generated Go
+client for only the operations the provider supports. The operation allowlist
+in `api-client-config.yaml` prevents unrelated API endpoints from silently
+expanding the provider surface.
+
+```sh
+task generate       # regenerate from the checked-in normalized spec
+task generate:check # fail if generated code has drifted
+task sync:openapi   # download production /v1/doc, normalize, generate, and test
+```
+
+The model-training settings route is deliberately the sole handwritten client
+exception because that route is not published in the OpenAPI document.
+
 Provider configuration can come from Terraform configuration or environment variables:
 
 - `POLYLANE_API_KEY`
@@ -36,14 +80,17 @@ Provider configuration can come from Terraform configuration or environment vari
 
 ### Acceptance Tests
 
-Acceptance tests use the Terraform provider test harness. Today they only
-exercise provider configuration; once resources exist they will create real
-Polylane objects, and `POLYLANE_API_KEY` will need to be in `.env` or exported
-in your shell.
+Acceptance tests use the Terraform provider test harness and the read-only
+workspace import path. Set `POLYLANE_API_KEY`, `POLYLANE_ENDPOINT`, and
+`POLYLANE_WORKSPACE_ID` in an ignored `.env` file or export them in your shell.
 
 ```sh
 task test:acc
 ```
+
+The team lifecycle acceptance test creates, updates, imports, and deletes a
+temporary team. It only runs when `POLYLANE_TEAM_ACCEPTANCE=1` and the API key
+has `teams:read`, `teams:write`, and `teams:delete` scopes.
 
 ## Documentation
 
