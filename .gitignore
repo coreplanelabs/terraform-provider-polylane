@@ -1,0 +1,16 @@
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+.env
+
+dist/
+coverage.out
+test-results.xml
+
+.task/
+
+.DS_Store
