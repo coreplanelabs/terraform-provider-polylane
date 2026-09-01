@@ -23,15 +23,31 @@ jobs:
       minor: ${{ steps.release.outputs.minor }}
       patch: ${{ steps.release.outputs.patch }}
     steps:
-      # NOTE: release PRs created with the default GITHUB_TOKEN do not trigger
-      # other workflows (ci must be re-triggered manually, e.g. by closing and
-      # reopening the release PR). Swap in a GitHub App token or PAT here if
-      # that becomes a nuisance.
+      # PRs created or updated with GITHUB_TOKEN put their workflow runs into
+      # an approval-required state. Use the org's automation app so release PR
+      # checks start immediately without weakening branch protection.
+      - name: Load GitHub App credentials from 1Password
+        uses: 1password/load-secrets-action@3a12b0ab99d9cd590a3e9b5a90ea017210ed9556 # v4.0.1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          COREPLANE_CLIENT_ID: op://CI/coreplane-bot/client-id
+          COREPLANE_PRIVATE_SIGNING_KEY: op://CI/coreplane-bot/private-key
+
+      - name: Generate GitHub App token
+        id: generate-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          client-id: ${{ env.COREPLANE_CLIENT_ID }}
+          private-key: ${{ env.COREPLANE_PRIVATE_SIGNING_KEY }}
+          owner: ${{ github.repository_owner }}
+
       - name: Create or update release PR
         id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           target-branch: ${{ github.ref_name }}
 
   # When release-please publishes a tagged release, build, sign, and attach the
