@@ -43,6 +43,7 @@ jobs:
       POLYLANE_ENDPOINT: ${{ secrets.POLYLANE_ENDPOINT }}
       POLYLANE_WORKSPACE_ID: ${{ secrets.POLYLANE_WORKSPACE_ID }}
       POLYLANE_TEAM_ACCEPTANCE: ${{ secrets.POLYLANE_TEAM_ACCEPTANCE }}
+      POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE: ${{ secrets.POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6

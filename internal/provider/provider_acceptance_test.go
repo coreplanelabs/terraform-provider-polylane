@@ -44,6 +44,15 @@ func testAccTeamPreCheck(t *testing.T) {
 	}
 }
 
+func testAccAWSConnectionRequestPreCheck(t *testing.T) {
+	t.Helper()
+	testAccWorkspacePreCheck(t)
+
+	if os.Getenv("POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE") != "1" {
+		t.Skip("POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE=1 is required for the mutating AWS connection request lifecycle test")
+	}
+}
+
 // TestAccProviderConfigure exercises the full Terraform plan/apply cycle with
 // an explicitly configured provider block and no resources.
 func TestAccProviderConfigure(t *testing.T) {
@@ -188,4 +197,43 @@ resource "polylane_team" "test" {
   description  = "Created by the Terraform provider acceptance suite."
 }
 `, workspaceID, name)
+}
+
+func TestAccAWSConnectionRequestLifecycle(t *testing.T) {
+	workspaceID := os.Getenv("POLYLANE_WORKSPACE_ID")
+	accountID := acctest.RandStringFromCharSet(12, "0123456789")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccAWSConnectionRequestPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAWSConnectionRequestConfig(workspaceID, accountID),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("polylane_aws_connection_request.test", "workspace_id", workspaceID),
+					resource.TestCheckResourceAttr("polylane_aws_connection_request.test", "account_id", accountID),
+					resource.TestCheckResourceAttr("polylane_aws_connection_request.test", "regions.#", "1"),
+					resource.TestCheckResourceAttr("polylane_aws_connection_request.test", "regions.0", "us-east-1"),
+					resource.TestCheckResourceAttr("polylane_aws_connection_request.test", "status", "pending"),
+					resource.TestCheckResourceAttrSet("polylane_aws_connection_request.test", "id"),
+					resource.TestCheckResourceAttrSet("polylane_aws_connection_request.test", "external_id"),
+					resource.TestCheckResourceAttrSet("polylane_aws_connection_request.test", "principal_arn"),
+					resource.TestCheckResourceAttrSet("polylane_aws_connection_request.test", "subscription_endpoint"),
+					resource.TestCheckResourceAttrSet("polylane_aws_connection_request.test", "region"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAWSConnectionRequestConfig(workspaceID, accountID string) string {
+	return fmt.Sprintf(`
+provider "polylane" {}
+
+resource "polylane_aws_connection_request" "test" {
+  workspace_id = %q
+  account_id   = %q
+  regions      = ["us-east-1"]
+}
+`, workspaceID, accountID)
 }

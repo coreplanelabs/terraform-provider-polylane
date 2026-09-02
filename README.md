@@ -130,6 +130,12 @@ The team lifecycle acceptance test creates, updates, imports, and deletes a
 temporary team. It only runs when `POLYLANE_TEAM_ACCEPTANCE=1` and the API key
 has `teams:read`, `teams:write`, and `teams:delete` scopes.
 
+The AWS connection-request acceptance test creates, reads, and deletes only a
+temporary Polylane-side handshake request; it never creates AWS resources. It
+only runs when `POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE=1` and the API key
+has `cloud_accounts:read`, `cloud_accounts:write`, and
+`cloud_accounts:delete` scopes.
+
 ## Documentation
 
 Registry docs under [docs/](docs/) are generated from the provider schema and the
