@@ -21,19 +21,21 @@ func TestAWSConnectionRequestRoutes(t *testing.T) {
 
 	requestResult := fmt.Sprintf(`{"requestId":%q,"externalId":%q,"awsAccountId":"123456789012","region":"us-east-1","regions":["us-east-1"],"trustedPrincipal":{"accountId":"251714435813","arn":"arn:aws:iam::251714435813:root"},"subscriptionEndpoint":"https://aws.polylane.com/sns","status":"pending","cloudAccountId":null}`, testRequestID, testRequestID)
 	tests := []struct {
-		name   string
-		method string
-		path   string
-		body   string
-		result string
-		invoke func(context.Context, *Client) error
+		name        string
+		method      string
+		path        string
+		body        string
+		contentType string
+		result      string
+		invoke      func(context.Context, *Client) error
 	}{
 		{
-			name:   "create",
-			method: http.MethodPost,
-			path:   "/v1/aws_connection_requests",
-			body:   `"awsAccountId":"123456789012"`,
-			result: requestResult,
+			name:        "create",
+			method:      http.MethodPost,
+			path:        "/v1/aws_connection_requests",
+			body:        `"awsAccountId":"123456789012"`,
+			contentType: "application/json",
+			result:      requestResult,
 			invoke: func(ctx context.Context, apiClient *Client) error {
 				result, err := apiClient.CreateAWSConnectionRequest(ctx, CreateAWSConnectionRequestInput{
 					WorkspaceID: testWorkspaceID, AccountID: "123456789012", Regions: []string{"us-east-1"}, IdempotencyKey: "terraform_test",
@@ -58,10 +60,11 @@ func TestAWSConnectionRequestRoutes(t *testing.T) {
 			},
 		},
 		{
-			name:   "delete",
-			method: http.MethodDelete,
-			path:   "/v1/aws_connection_requests/" + testWorkspaceID + "/" + testRequestID,
-			result: fmt.Sprintf(`{"requestId":%q}`, testRequestID),
+			name:        "delete",
+			method:      http.MethodDelete,
+			path:        "/v1/aws_connection_requests/" + testWorkspaceID + "/" + testRequestID,
+			contentType: "application/json",
+			result:      fmt.Sprintf(`{"requestId":%q}`, testRequestID),
 			invoke: func(ctx context.Context, apiClient *Client) error {
 				return apiClient.DeleteAWSConnectionRequest(ctx, testWorkspaceID, testRequestID)
 			},
@@ -77,6 +80,9 @@ func TestAWSConnectionRequestRoutes(t *testing.T) {
 				requestBody = string(body)
 				if request.Method != test.method || request.URL.Path != test.path {
 					t.Errorf("unexpected request: %s %s", request.Method, request.URL.Path)
+				}
+				if got := request.Header.Get("Content-Type"); got != test.contentType {
+					t.Errorf("unexpected content type: got %q, want %q", got, test.contentType)
 				}
 				writeTestEnvelope(w, test.result)
 			}))

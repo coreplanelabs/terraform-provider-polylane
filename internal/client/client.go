@@ -73,6 +73,12 @@ func New(apiKey, endpoint, version string, httpClient *http.Client) (*Client, er
 			req.Header.Set("Accept", "application/json")
 			req.Header.Set("X-API-Key", apiKey)
 			req.Header.Set("User-Agent", userAgent)
+			// Hono's CSRF middleware treats an unsafe request without a content
+			// type as form-shaped text/plain. Mark bodyless DELETE requests as
+			// API requests so they are not rejected before API-key auth runs.
+			if req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch || req.Method == http.MethodDelete {
+				req.Header.Set("Content-Type", "application/json")
+			}
 			return nil
 		}),
 	)
