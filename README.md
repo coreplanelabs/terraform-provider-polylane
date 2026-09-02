@@ -136,6 +136,24 @@ only runs when `POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE=1` and the API key
 has `cloud_accounts:read`, `cloud_accounts:write`, and
 `cloud_accounts:delete` scopes.
 
+Pull requests run a secret-free provider protocol smoke test. Pushes to `main`,
+scheduled runs, and manually dispatched runs load `POLYLANE_API_KEY`,
+`POLYLANE_ENDPOINT`, and `POLYLANE_WORKSPACE_ID` from the dedicated 1Password
+Environment named `Terraform Provider`. Configure only these two repository
+settings:
+
+- Secret `OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN`: a dedicated 1Password
+  service-account token with read-only access to that Environment and any vault
+  items it references.
+- Variable `OP_TERRAFORM_PROVIDER_ENVIRONMENT_ID`: the UUID copied from the
+  Environment's **Manage environment** page.
+
+The live CI job enables the AWS connection-request lifecycle automatically, so
+the Environment's UAT API key needs `workspaces:read`, `workspace_members:read`,
+`cloud_accounts:read`, `cloud_accounts:write`, and `cloud_accounts:delete`.
+`POLYLANE_TEAM_ACCEPTANCE=1` may be added to the Environment when its API key
+and owning member both have `teams:read`, `teams:write`, and `teams:delete`.
+
 ## Documentation
 
 Registry docs under [docs/](docs/) are generated from the provider schema and the
