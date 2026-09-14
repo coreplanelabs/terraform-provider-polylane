@@ -34,7 +34,7 @@ env:
 
 jobs:
   acceptance:
-    runs-on: ubuntu-24.04
+    runs-on: depot-ubuntu-24.04
     env:
       # Pull requests always exercise the provider protocol with a harmless
       # smoke key. When repository secrets are configured, the same workflow
