@@ -1,0 +1,17 @@
+# Changelog
+
+## 1.0.0 (2026-09-14)
+
+
+### Features
+
+* **client:** generate scoped Polylane API client ([#3](https://github.com/coreplanelabs/terraform-provider-polylane/issues/3)) ([5cd8cea](https://github.com/coreplanelabs/terraform-provider-polylane/commit/5cd8ceaf421a2a1753fa9cb32fd090295eb7659c))
+* **provider:** connect customer-managed AWS accounts ([#7](https://github.com/coreplanelabs/terraform-provider-polylane/issues/7)) ([3ae675d](https://github.com/coreplanelabs/terraform-provider-polylane/commit/3ae675d100b66adc86e5b8bcc7ff8332f43e526a))
+* **provider:** manage workspaces members and teams ([#4](https://github.com/coreplanelabs/terraform-provider-polylane/issues/4)) ([0322545](https://github.com/coreplanelabs/terraform-provider-polylane/commit/0322545c06aab85f5dafc048854e1caf69cf39d4))
+* scaffold terraform provider skeleton with CI, hermit, and release tooling ([#1](https://github.com/coreplanelabs/terraform-provider-polylane/issues/1)) ([d884c83](https://github.com/coreplanelabs/terraform-provider-polylane/commit/d884c8364792c16046457ed4a2490dde6b81258e))
+
+
+### Bug Fixes
+
+* **ci:** run checks on automated release PRs ([#8](https://github.com/coreplanelabs/terraform-provider-polylane/issues/8)) ([0c09705](https://github.com/coreplanelabs/terraform-provider-polylane/commit/0c097055183a10509c93bcc8a70bd2f06c26d69e))
+* **provider:** support API-key resource deletion ([#10](https://github.com/coreplanelabs/terraform-provider-polylane/issues/10)) ([e3d7eac](https://github.com/coreplanelabs/terraform-provider-polylane/commit/e3d7eac1444ff3820a090f0c59fecc5968154aa2))
