@@ -82,7 +82,6 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN }}
           OP_ENVIRONMENT_ID: ${{ vars.OP_TERRAFORM_PROVIDER_ENVIRONMENT_ID }}
-          POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE: "1"
         run: |
           test -n "$OP_SERVICE_ACCOUNT_TOKEN" || {
             echo "Missing OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN repository secret" >&2
@@ -92,4 +91,12 @@ jobs:
             echo "Missing OP_TERRAFORM_PROVIDER_ENVIRONMENT_ID repository variable" >&2
             exit 1
           }
-          op run --environment "$OP_ENVIRONMENT_ID" -- task test:acc
+          # Expand credentials in the child shell after op injects them.
+          # shellcheck disable=SC2016
+          op run --environment "$OP_ENVIRONMENT_ID" -- sh -eu -c '
+            : "${POLYLANE_API_KEY:?Missing live API key}"
+            : "${POLYLANE_ENDPOINT:?Missing live API endpoint}"
+            : "${POLYLANE_WORKSPACE_ID:?Missing live workspace ID}"
+            export POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE=1
+            exec task test:acc
+          '
