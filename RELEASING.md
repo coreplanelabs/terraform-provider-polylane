@@ -69,11 +69,13 @@ secret through a pipe or protected temporary file, never terminal output.
 4. Add the ASCII-armored **public** RSA key to the namespace's **Settings → New
    GPG Key**. For a namespace still managed directly in the Registry, use
    **User Settings → Signing Keys** instead. Never upload the private key.
-5. In the namespace's **Providers → Publish → New provider** flow (or the
+5. In the namespace's **Publish → Provider** flow (or the
    Registry's **Publish → Provider** flow), select
    `coreplanelabs/terraform-provider-polylane`. The public repository and at
    least one complete, signed release must already exist. Authorize the
-   required repository webhook access and complete the publishing form.
+   required repository webhook access and complete the publishing form. For HCP
+   namespaces, install the Terraform Cloud GitHub App on this repository if it
+   is not already installed, choose the provider category, and review the terms.
 6. Confirm version `0.1.0`, documentation, and target platforms appear. The
    provider uses protocol `6.0`. Preview generated docs with the
    [Registry doc preview](https://registry.terraform.io/tools/doc-preview).
@@ -127,4 +129,5 @@ repository is public; actionlint and zizmor check workflows on PRs.
 
 References: [provider publishing requirements](https://developer.hashicorp.com/terraform/registry/providers/publishing),
 [HCP public namespaces](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace),
-[namespace signing keys](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace/manage).
+[namespace signing keys](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace/manage),
+[publishing namespace artifacts](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace/artifacts).

@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import shutil
 import zipfile
 
 
@@ -46,4 +47,13 @@ def verify(directory: Path) -> None:
 
 
 if __name__ == "__main__":
-    verify(Path(sys.argv[1]))
+    directory = Path(sys.argv[1])
+    if len(sys.argv) == 3 and sys.argv[2] == "--snapshot":
+        # GoReleaser includes extra_files in checksums but only copies them
+        # when uploading. Stage that same file for the offline snapshot check.
+        version = json.loads((directory / "metadata.json").read_text())["version"]
+        shutil.copyfile(
+            "terraform-registry-manifest.json",
+            directory / f"terraform-provider-polylane_{version}_manifest.json",
+        )
+    verify(directory)
