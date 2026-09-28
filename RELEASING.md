@@ -51,35 +51,39 @@ secret through a pipe or protected temporary file, never terminal output.
 
 ## First release and Registry enrollment
 
-1. Confirm the replacement release PR proposes `0.1.0`, including
+1. If the readiness merge ran before credentials were configured, rerun its
+   failed **release-please** Actions run after setup (`gh run rerun RUN_ID
+   --failed`). That regenerates the release PR. The manual workflow dispatch
+   input is reserved for recovering an existing draft release.
+2. Confirm the replacement release PR proposes `0.1.0`, including
    `.release-please-manifest.json`, `internal/buildinfo/buildinfo.go`, and
    `CHANGELOG.md`. The readiness commit also carries `Release-As: 0.1.0` so the
    earlier unmerged `1.0.0` proposal is superseded.
-2. Merge that release PR once all checks pass. Release Please creates an
+3. Merge that release PR once all checks pass. Release Please creates an
    immutable version tag and a **draft** release. GoReleaser checks out that
    tag, tests the source, builds the platform archives, and signs SHA256SUMS.
    The workflow downloads the uploaded files, verifies their checksums,
    manifest, archive layout, and GPG signature, then publishes the release.
-3. Sign in at [Terraform Registry](https://registry.terraform.io). For team
+4. Sign in at [Terraform Registry](https://registry.terraform.io). For team
    ownership, use an HCP Terraform organization and claim the GitHub namespace
    `coreplanelabs` under **Registry → Public namespaces**. Use an organization
    owner account to authorize the GitHub connection. If the namespace is
    already claimed, use its owning HCP organization rather than creating a
    second claim. HCP Europe does not currently support public namespaces.
-4. Add the ASCII-armored **public** RSA key to the namespace's **Settings → New
+5. Add the ASCII-armored **public** RSA key to the namespace's **Settings → New
    GPG Key**. For a namespace still managed directly in the Registry, use
    **User Settings → Signing Keys** instead. Never upload the private key.
-5. In the namespace's **Publish → Provider** flow (or the
+6. In the namespace's **Publish → Provider** flow (or the
    Registry's **Publish → Provider** flow), select
    `coreplanelabs/terraform-provider-polylane`. The public repository and at
    least one complete, signed release must already exist. Authorize the
    required repository webhook access and complete the publishing form. For HCP
    namespaces, install the Terraform Cloud GitHub App on this repository if it
    is not already installed, choose the provider category, and review the terms.
-6. Confirm version `0.1.0`, documentation, and target platforms appear. The
+7. Confirm version `0.1.0`, documentation, and target platforms appear. The
    provider uses protocol `6.0`. Preview generated docs with the
    [Registry doc preview](https://registry.terraform.io/tools/doc-preview).
-7. In a fresh directory without developer overrides, use the following config
+8. In a fresh directory without developer overrides, use the following config
    and run `terraform init` and `terraform providers schema -json`. This checks
    installation and protocol startup without needing an API key or creating
    resources. Inspect the reported signing fingerprint and lockfile.
