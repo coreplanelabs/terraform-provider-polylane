@@ -1,75 +1,97 @@
 ---
+name: release-please
+
 "on":
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing draft release tag to resume (for example v0.1.0)
+        required: true
+        type: string
 
 permissions:
   contents: read
 
-name: release-please
+concurrency:
+  group: provider-release
+  cancel-in-progress: false
 
 jobs:
   release-please:
+    if: github.event_name == 'push'
     runs-on: depot-ubuntu-24.04
-    permissions:
-      contents: write
-      pull-requests: write
+    environment: release
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
-      version: ${{ steps.release.outputs.version }}
-      major: ${{ steps.release.outputs.major }}
-      minor: ${{ steps.release.outputs.minor }}
-      patch: ${{ steps.release.outputs.patch }}
     steps:
-      # PRs created or updated with GITHUB_TOKEN put their workflow runs into
-      # an approval-required state. Use the org's automation app so release PR
-      # checks start immediately without weakening branch protection.
-      - name: Load GitHub App credentials from 1Password
-        uses: 1password/load-secrets-action@3a12b0ab99d9cd590a3e9b5a90ea017210ed9556 # v4.0.1
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          COREPLANE_CLIENT_ID: op://CI/coreplane-bot/client-id
-          COREPLANE_PRIVATE_SIGNING_KEY: op://CI/coreplane-bot/private-key
-
-      - name: Generate GitHub App token
+      # Use an app installed only on this repository, never the org-wide bot.
+      # App-authored release PRs trigger their normal CI checks.
+      - name: Generate repository-scoped GitHub App token
         id: generate-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
-          client-id: ${{ env.COREPLANE_CLIENT_ID }}
-          private-key: ${{ env.COREPLANE_PRIVATE_SIGNING_KEY }}
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
 
-      - name: Create or update release PR
+      - name: Create or update release PR and draft release
         id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          target-branch: ${{ github.ref_name }}
+          target-branch: main
 
-  # When release-please publishes a tagged release, build, sign, and attach the
-  # provider artifacts the Terraform Registry ingests (zips, SHA256SUMS,
-  # SHA256SUMS.sig, and the manifest).
   goreleaser:
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    if: >-
+      always() && !cancelled() && github.ref == 'refs/heads/main' &&
+      (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: depot-ubuntu-24.04
+    environment: release
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag || needs.release-please.outputs.tag_name }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Checkout protected main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
+          ref: main
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify release target
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Expected vMAJOR.MINOR.PATCH" >&2; exit 1; }
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true || {
+            echo "Only existing draft releases can be built; published versions must never be replaced" >&2
+            exit 1
+          }
+          git merge-base --is-ancestor "refs/tags/$RELEASE_TAG" origin/main
+          git checkout --detach "refs/tags/$RELEASE_TAG"
+          python3 - "$RELEASE_TAG" <<'PY'
+          import json, sys
+          version = json.load(open('.release-please-manifest.json'))['.']
+          assert sys.argv[1] == 'v' + version, 'Tag does not match release manifest'
+          PY
 
       - name: Activate Hermit
-        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v1
+        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v01.1.2
         with:
-          cache: "true"
+          cache: "false"
+
+      - name: Test release source
+        run: go test -race ./...
 
       - name: Import GPG key
         id: import_gpg
@@ -78,11 +100,19 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
-        with:
-          version: "~> v2"
-          args: release --clean
+      - name: Build, sign, and upload to draft
+        run: goreleaser release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+
+      - name: Verify uploaded artifacts and publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=$(mktemp -d)
+          gh release download "$RELEASE_TAG" --dir "$assets"
+          python3 scripts/verify-release.py "$assets"
+          gpg --verify "$assets/terraform-provider-polylane_${RELEASE_TAG#v}_SHA256SUMS.sig" \
+            "$assets/terraform-provider-polylane_${RELEASE_TAG#v}_SHA256SUMS"
+          gh release edit "$RELEASE_TAG" --draft=false --latest

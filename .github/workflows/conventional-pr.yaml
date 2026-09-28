@@ -8,6 +8,8 @@ name: conventional-pr
       - opened
       - edited
       - synchronize
+permissions: {}
+
 jobs:
   lint-pr:
     runs-on: depot-ubuntu-24.04
@@ -15,7 +17,9 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: CondeNast/conventional-pull-request-action@3ce30fdb4d2beef8b941f23a1114dd8188eba082 # v0.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

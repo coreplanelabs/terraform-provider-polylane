@@ -57,6 +57,9 @@ func New(apiKey, endpoint, version string, httpClient *http.Client) (*Client, er
 	if parsedEndpoint.Host == "" {
 		return nil, fmt.Errorf("endpoint must include a host")
 	}
+	if parsedEndpoint.User != nil {
+		return nil, fmt.Errorf("endpoint must not include user information")
+	}
 	if parsedEndpoint.RawQuery != "" || parsedEndpoint.Fragment != "" {
 		return nil, fmt.Errorf("endpoint must not include a query string or fragment")
 	}
@@ -64,6 +67,15 @@ func New(apiKey, endpoint, version string, httpClient *http.Client) (*Client, er
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 30 * time.Second}
 	}
+
+	// X-API-Key is a custom header: net/http forwards it on redirects,
+	// including redirects to another host. Never send credentials elsewhere.
+	// Copy the caller's client so this policy does not mutate shared clients.
+	secureClient := *httpClient
+	secureClient.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	httpClient = &secureClient
 
 	userAgent := "terraform-provider-polylane/" + version
 	generatedClient, err := api.NewClientWithResponses(

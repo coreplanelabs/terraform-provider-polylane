@@ -132,6 +132,7 @@ func TestNewRejectsInvalidEndpoints(t *testing.T) {
 		"api.polylane.com/v1",
 		"ftp://api.polylane.com/v1",
 		"https:///v1",
+		"https://user:password@api.polylane.com/v1",
 		"https://api.polylane.com/v1?debug=true",
 		"https://api.polylane.com/v1#fragment",
 	}
@@ -141,6 +142,45 @@ func TestNewRejectsInvalidEndpoints(t *testing.T) {
 			t.Parallel()
 			if _, err := New("test-key", endpoint, "test", nil); err == nil {
 				t.Fatalf("expected endpoint %q to be rejected", endpoint)
+			}
+		})
+	}
+}
+
+func TestClientDoesNotFollowRedirects(t *testing.T) {
+	t.Parallel()
+	for _, name := range []string{"generated", "handwritten"} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t.Error("redirect destination must not receive a request")
+				w.WriteHeader(http.StatusNoContent)
+			}))
+			t.Cleanup(destination.Close)
+			origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Header.Get("X-API-Key") != "test-key" {
+					t.Error("original request must be authenticated")
+				}
+				http.Redirect(w, r, destination.URL, http.StatusTemporaryRedirect)
+			}))
+			t.Cleanup(origin.Close)
+			transport := origin.Client()
+			apiClient, err := New("test-key", origin.URL, "test", transport)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if name == "generated" {
+				_, err = apiClient.GetWorkspace(context.Background(), "ws_123")
+			} else {
+				var settings map[string]any
+				err = apiClient.GetWorkspaceSettings(context.Background(), "ws_123", "model_training_settings", &settings)
+			}
+			var apiErr *APIError
+			if !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusTemporaryRedirect {
+				t.Fatalf("expected redirect API error, got %v", err)
+			}
+			if transport.CheckRedirect != nil {
+				t.Error("caller-owned HTTP client was modified")
 			}
 		})
 	}

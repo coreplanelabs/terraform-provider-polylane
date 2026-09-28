@@ -31,27 +31,72 @@ permissions:
 
 env:
   CI: "true"
+  # 1Password Environments support is currently available in this beta CLI.
+  # Keep this aligned with the version used by the main application deploys.
+  OP_CLI_VERSION: 2.38.0-beta.01
 
 jobs:
-  acceptance:
+  smoke:
     runs-on: depot-ubuntu-24.04
-    env:
-      # Pull requests always exercise the provider protocol with a harmless
-      # smoke key. When repository secrets are configured, the same workflow
-      # also runs the read-only UAT imports. Mutating team tests remain opt-in.
-      POLYLANE_API_KEY: ${{ secrets.POLYLANE_API_KEY || 'acceptance-smoke-key' }}
-      POLYLANE_ENDPOINT: ${{ secrets.POLYLANE_ENDPOINT }}
-      POLYLANE_WORKSPACE_ID: ${{ secrets.POLYLANE_WORKSPACE_ID }}
-      POLYLANE_TEAM_ACCEPTANCE: ${{ secrets.POLYLANE_TEAM_ACCEPTANCE }}
-      POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE: ${{ secrets.POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Activate Hermit
-        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v1
+        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v01.1.2
         with:
           cache: "true"
 
-      - name: Run acceptance tests
+      - name: Run provider protocol smoke test
+        env:
+          POLYLANE_API_KEY: acceptance-smoke-key
         run: task test:acc
+
+  live:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: depot-ubuntu-24.04
+    environment: acceptance
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Activate Hermit
+        uses: cashapp/activate-hermit@e49f5cb4dd64ff0b0b659d1d8df499595451155a # v01.1.2
+        with:
+          cache: "false"
+
+      - name: Install 1Password CLI (beta — Environments support)
+        run: |
+          set -euo pipefail
+          curl -sSfLo /tmp/op.zip \
+            "https://cache.agilebits.com/dist/1P/op2/pkg/v${OP_CLI_VERSION}/op_linux_amd64_v${OP_CLI_VERSION}.zip"
+          unzip -oq /tmp/op.zip -d /tmp/op-cli
+          sudo install -m 0755 /tmp/op-cli/op /usr/local/bin/op
+          op --version
+
+      - name: Run live UAT acceptance tests
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN }}
+          OP_ENVIRONMENT_ID: ${{ vars.OP_TERRAFORM_PROVIDER_ENVIRONMENT_ID }}
+        run: |
+          test -n "$OP_SERVICE_ACCOUNT_TOKEN" || {
+            echo "Missing OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN repository secret" >&2
+            exit 1
+          }
+          test -n "$OP_ENVIRONMENT_ID" || {
+            echo "Missing OP_TERRAFORM_PROVIDER_ENVIRONMENT_ID repository variable" >&2
+            exit 1
+          }
+          # Expand credentials in the child shell after op injects them.
+          # shellcheck disable=SC2016
+          op run --environment "$OP_ENVIRONMENT_ID" -- sh -eu -c '
+            : "${POLYLANE_API_KEY:?Missing live API key}"
+            : "${POLYLANE_ENDPOINT:?Missing live API endpoint}"
+            : "${POLYLANE_WORKSPACE_ID:?Missing live workspace ID}"
+            export POLYLANE_AWS_CONNECTION_REQUEST_ACCEPTANCE=1
+            exec task test:acc
+          '
