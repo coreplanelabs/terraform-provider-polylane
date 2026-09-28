@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.1...v0.1.2) (2026-09-28)
+
+
+### Bug Fixes
+
+* **docs:** improve Polylane Registry onboarding and navigation ([#18](https://github.com/coreplanelabs/terraform-provider-polylane/issues/18)) ([c6a472b](https://github.com/coreplanelabs/terraform-provider-polylane/commit/c6a472b267a7f9b6e6889c5dfabb4b6ae3709d48))
+
 ## [0.1.1](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.0...v0.1.1) (2026-09-28)
 
 
