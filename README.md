@@ -22,7 +22,7 @@ Install the provider from the [Terraform Registry](https://registry.terraform.io
 terraform {
   required_providers {
     polylane = {
-      source  = "coreplanelabs/polylane"
+      source  = "registry.terraform.io/coreplanelabs/polylane"
       version = "~> 0.1.0"
     }
   }
