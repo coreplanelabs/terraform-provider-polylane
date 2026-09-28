@@ -4,7 +4,7 @@ terraform {
   required_providers {
     polylane = {
       source  = "registry.terraform.io/coreplanelabs/polylane"
-      version = ">= 0.1.0"
+      version = "~> 0.1.0"
     }
   }
 }

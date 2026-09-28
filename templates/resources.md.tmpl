@@ -1,0 +1,46 @@
+---
+page_title: "{{.Name}} {{.Type}} - Polylane"
+subcategory: "{{if or (eq .Name "polylane_aws_connection") (eq .Name "polylane_aws_connection_request")}}Cloud connections{{else if or (eq .Name "polylane_team") (eq .Name "polylane_team_member") (eq .Name "polylane_workspace_member")}}Teams and access{{else if eq .Name "polylane_workspace"}}Workspace{{else}}Workspace settings{{end}}"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+{{ if .HasExamples -}}
+## Example Usage
+{{- range .ExampleFiles }}
+
+{{ tffile . }}
+{{- end }}
+{{- end }}
+
+{{ .SchemaMarkdown | trimspace }}
+{{- if or .HasImport .HasImportIDConfig .HasImportIdentityConfig }}
+
+## Import
+
+Import is supported using the following syntax:
+{{- end }}
+{{- if .HasImportIdentityConfig }}
+
+In Terraform v1.12.0 and later, the `import` block can use an `identity` attribute:
+
+{{ tffile .ImportIdentityConfigFile }}
+
+{{ .IdentitySchemaMarkdown | trimspace }}
+{{- end }}
+{{- if .HasImportIDConfig }}
+
+In Terraform v1.5.0 and later, the `import` block can use an `id` attribute:
+
+{{ tffile .ImportIDConfigFile }}
+{{- end }}
+{{- if .HasImport }}
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+{{ codefile "shell" .ImportFile }}
+{{- end }}

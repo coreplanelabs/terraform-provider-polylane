@@ -16,14 +16,14 @@ Workspace creation and destructive deletion are intentionally not supported.
 Integration credentials and custom model provider credentials are also outside
 the initial scope so they never need to be stored in Terraform state.
 
-Once published, the provider is sourced as `coreplanelabs/polylane`:
+Install the provider from the [Terraform Registry](https://registry.terraform.io/providers/coreplanelabs/polylane/latest/docs) as `coreplanelabs/polylane`:
 
 ```hcl
 terraform {
   required_providers {
     polylane = {
-      source  = "coreplanelabs/polylane"
-      version = "~> 0.1"
+      source  = "registry.terraform.io/coreplanelabs/polylane"
+      version = "~> 0.1.0"
     }
   }
 }
