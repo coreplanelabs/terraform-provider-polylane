@@ -8,7 +8,11 @@
       "package-name": "terraform-provider-polylane",
       "extra-files": [
         "internal/buildinfo/buildinfo.go"
-      ]
+      ],
+      "initial-version": "0.1.0"
     }
-  }
+  },
+  "draft": true,
+  "force-tag-creation": true,
+  "include-component-in-tag": false
 }

@@ -6,6 +6,11 @@ crash.log
 crash.*.log
 
 .env
+.env.*
+!.env.example
+*.tfplan
+*.pem
+*.key
 
 dist/
 coverage.out

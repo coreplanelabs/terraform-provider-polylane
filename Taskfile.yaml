@@ -30,6 +30,8 @@ tasks:
       - task: test
       - task: security
       - task: build
+      - task: lint:workflows
+      - task: release:check
 
   init:
     desc: "Download dependencies and initialize local tool plugins"
@@ -182,7 +184,7 @@ tasks:
     cmds:
       - |
         if git rev-parse --verify HEAD >/dev/null 2>&1; then
-          gitleaks git . --redact --no-banner
+          gitleaks git . --log-opts="--all" --redact --no-banner
         fi
       - gitleaks dir . --redact --no-banner
 
@@ -196,3 +198,15 @@ tasks:
     desc: "Remove local build and report artifacts"
     cmds:
       - rm -rf {{.DIST_DIR}} coverage.out test-results.xml .task
+
+  lint:workflows:
+    desc: "Validate GitHub Actions workflows"
+    cmds:
+      - actionlint
+
+  release:check:
+    desc: "Build and verify unsigned Registry release artifacts without publishing"
+    cmds:
+      - goreleaser check
+      - goreleaser release --snapshot --clean --skip=publish,sign
+      - python3 scripts/verify-release.py dist

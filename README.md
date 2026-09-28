@@ -23,7 +23,7 @@ terraform {
   required_providers {
     polylane = {
       source  = "coreplanelabs/polylane"
-      version = ">= 0.1.0"
+      version = "~> 0.1"
     }
   }
 }
@@ -139,8 +139,8 @@ has `cloud_accounts:read`, `cloud_accounts:write`, and
 Pull requests run a secret-free provider protocol smoke test. Pushes to `main`,
 scheduled runs, and manually dispatched runs load `POLYLANE_API_KEY`,
 `POLYLANE_ENDPOINT`, and `POLYLANE_WORKSPACE_ID` from the dedicated 1Password
-Environment named `Terraform Provider`. Configure only these two repository
-settings:
+Environment named `Terraform Provider`. Configure these settings in the
+`acceptance` GitHub environment, which permits only the `main` branch:
 
 - Secret `OP_TERRAFORM_PROVIDER_SERVICE_ACCOUNT_TOKEN`: a dedicated 1Password
   service-account token with read-only access to that Environment and any vault
@@ -170,30 +170,14 @@ than the generated Markdown.
 
 ## Releasing & Publishing
 
-Releases are automated:
+Release Please maintains a version PR from Conventional Commits. Merging it
+creates a tag and draft release. GoReleaser builds and signs the provider,
+verifies the uploaded artifacts, then publishes the complete release for the
+Terraform Registry. The first version is `0.1.0`.
 
-1. [release-please](https://github.com/googleapis/release-please) opens a release
-   PR from Conventional Commits. Merging it tags `vX.Y.Z` and creates a GitHub
-   release.
-2. The `goreleaser` job in [release.yaml](.github/workflows/release.yaml) then
-   builds the provider for all target platforms and attaches the artifacts the
-   Terraform Registry ingests: the per-platform zips, `*_SHA256SUMS`,
-   `*_SHA256SUMS.sig` (GPG detached signature), and `*_manifest.json`.
+See [RELEASING.md](RELEASING.md) for credential setup, Registry enrollment,
+release verification, and recovery. `task release:check` exercises the complete
+archive build without signing or publishing.
 
-### One-time setup to publish to the Terraform Registry
-
-1. Make this repository **public**.
-2. Generate a GPG signing key (RSA/DSA, not ECC), then:
-   - Add the **public** key at <https://registry.terraform.io> → *User Settings →
-     Signing Keys*.
-   - Add the **private** key and its passphrase as repository secrets
-     `GPG_PRIVATE_KEY` (ASCII-armored) and `PASSPHRASE`.
-3. On the registry, *Publish → Provider* and select this repo. The registry adds a
-   release webhook and ingests each finalized release automatically.
-
-Provider metadata for the registry lives in
-[`terraform-registry-manifest.json`](terraform-registry-manifest.json)
-(`protocol_versions: ["6.0"]`, terraform-plugin-framework).
-
-Preview the rendered registry pages at
-<https://registry.terraform.io/tools/doc-preview>.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions and
+[SECURITY.md](SECURITY.md) for private vulnerability reports.
