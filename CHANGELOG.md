@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.0...v0.1.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **ci:** use CodeQL Go autobuild extraction ([#16](https://github.com/coreplanelabs/terraform-provider-polylane/issues/16)) ([8a0ef8a](https://github.com/coreplanelabs/terraform-provider-polylane/commit/8a0ef8a6cb2c216051e4786e4fc4e03f020ada93))
+
 ## 0.1.0 (2026-09-28)
 
 
