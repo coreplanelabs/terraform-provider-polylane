@@ -82,6 +82,8 @@ func TestProviderServerSchema(t *testing.T) {
 	resourceNames := []string{
 		"polylane_aws_connection",
 		"polylane_aws_connection_request",
+		"polylane_gcp_connection",
+		"polylane_gcp_connection_request",
 		"polylane_team",
 		"polylane_team_member",
 		"polylane_workspace",
