@@ -14,7 +14,7 @@ variable "subject" {
   type        = string
   description = "Immutable Polylane federation subject."
   validation {
-    condition     = can(regex("^[A-Za-z0-9_-]+$", var.subject))
+    condition     = can(regex("^[A-Za-z0-9_:-]+$", var.subject))
     error_message = "Use the subject returned by Polylane."
   }
 }

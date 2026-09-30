@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"github.com/coreplanelabs/terraform-provider-polylane/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -58,7 +59,7 @@ func (r *gcpConnectionResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	remote, err := r.client.ActivateGCPConnection(ctx, client.ActivateGCPConnectionInput{WorkspaceID: plan.WorkspaceID.ValueString(), RequestID: plan.RequestID.ValueString(), ProjectNumber: plan.ProjectNumber.ValueString()})
+	remote, err := activateGCPWithRetry(ctx, r.client, client.ActivateGCPConnectionInput{WorkspaceID: plan.WorkspaceID.ValueString(), RequestID: plan.RequestID.ValueString(), ProjectNumber: plan.ProjectNumber.ValueString()}, waitForGCPRetry)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to Create GCP Connection", err.Error())
 		return

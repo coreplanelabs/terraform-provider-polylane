@@ -26,6 +26,7 @@ tasks:
       - task: format
       - task: lint
       - task: examples:validate
+      - task: modules:validate
       - task: docs
       - task: test
       - task: security
@@ -149,6 +150,27 @@ tasks:
               TF_CLI_CONFIG_FILE="{{.ROOT_DIR}}/.task/opentofu/provider-dev.tfrc" tofu validate
             )
           fi
+        done
+
+  modules:validate:
+    desc: "Validate GCP modules against the locally built provider"
+    deps:
+      - build
+    cmds:
+      - mkdir -p .task/opentofu
+      - |
+        cat > .task/opentofu/provider-dev.tfrc <<EOF
+        provider_installation {
+          dev_overrides {
+            "registry.terraform.io/coreplanelabs/polylane" = "{{.ROOT_DIR}}/{{.DIST_DIR}}"
+          }
+          direct {}
+        }
+        EOF
+      - |
+        for dir in modules/google-connection modules/gcp; do
+          tofu -chdir="$dir" init -backend=false -input=false
+          TF_CLI_CONFIG_FILE="{{.ROOT_DIR}}/.task/opentofu/provider-dev.tfrc" tofu -chdir="$dir" validate
         done
 
   docs:
