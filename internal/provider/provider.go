@@ -119,6 +119,8 @@ func (p *polylaneProvider) Resources(_ context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		NewAWSConnectionRequestResource,
 		NewAWSConnectionResource,
+		NewGCPConnectionRequestResource,
+		NewGCPConnectionResource,
 		NewWorkspaceResource,
 		NewWorkspaceMemberResource,
 		NewTeamResource,
