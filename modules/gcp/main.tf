@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.5, < 2.0"
   required_providers {
     polylane = {
-      source = "coreplanelabs/polylane"
+      source = "registry.terraform.io/coreplanelabs/polylane"
     }
     google = {
       source  = "hashicorp/google"

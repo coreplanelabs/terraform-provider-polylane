@@ -27,7 +27,7 @@ From a checkout, reference the module with a local path:
 ```hcl
 terraform {
   required_providers {
-    polylane = { source = "coreplanelabs/polylane" }
+    polylane = { source = "registry.terraform.io/coreplanelabs/polylane" }
     google = { source = "hashicorp/google", version = "~> 7.0" }
     google-beta = { source = "hashicorp/google-beta", version = "~> 7.0" }
   }
