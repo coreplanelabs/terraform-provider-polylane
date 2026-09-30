@@ -19,7 +19,7 @@ func TestGCPActivationRetry(t *testing.T) {
 		wantCalls int
 		wantError bool
 	}{
-		{"transient eventually registers", []int{503, 429, 200}, 3, false},
+		{"transient eventually registers", []int{500, 429, 200}, 3, false},
 		{"wrong identity is terminal", []int{400}, 1, true},
 		{"unauthorized is terminal", []int{403}, 1, true},
 		{"conflict is terminal", []int{409}, 1, true},

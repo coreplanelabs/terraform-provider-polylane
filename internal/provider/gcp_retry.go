@@ -14,7 +14,7 @@ func activateGCPWithRetry(ctx context.Context, apiClient *client.Client, input c
 	for attempt := 0; ; attempt++ {
 		connection, err := apiClient.ActivateGCPConnection(ctx, input)
 		var apiError *client.APIError
-		if err == nil || attempt >= 5 || !errors.As(err, &apiError) || (apiError.StatusCode != 429 && apiError.StatusCode != 502 && apiError.StatusCode != 503 && apiError.StatusCode != 504) {
+		if err == nil || attempt >= 5 || !errors.As(err, &apiError) || (apiError.StatusCode != 500 && apiError.StatusCode != 429 && apiError.StatusCode != 502 && apiError.StatusCode != 503 && apiError.StatusCode != 504) {
 			return connection, err
 		}
 		if err := wait(ctx, time.Duration(1<<min(attempt+1, 4))*time.Second); err != nil {
