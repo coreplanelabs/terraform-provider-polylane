@@ -1,4 +1,4 @@
-# Google-only connection infrastructure
+# Google-only connection infrastructure (Beta)
 
 This child module is the Infrastructure Manager blueprint and the infrastructure
 part of `../gcp`. It uses only `hashicorp/google` and `hashicorp/google-beta`.
@@ -11,13 +11,32 @@ Inputs: `project_id`, `request_id`, `subject`, `issuer_url`, `push_endpoint`,
 service account prefixed with `serviceAccount:` (or the user running Terraform).
 Outputs: `project_number`, `reader_email`, `push_subject`.
 
-Infrastructure Manager needs enabled `config.googleapis.com` and
-`cloudbuild.googleapis.com`, a region and an existing execution service account
-with `roles/config.agent` plus the installation roles listed in
-[the parent module](../gcp/README.md). Creating that privileged execution identity
-is a customer bootstrap step; this child does not grant its installer project
-administration permissions. Run IM against a root configuration that references
-this child with a commit-pinned Git source and provides its public inputs.
+## Prefilled Infrastructure Manager setup
+
+In Polylane, enter the project ID and numeric project number up front, choose
+Prepare setup, then Copy setup script. Paste the complete block into Google
+Cloud Shell or a terminal already signed in with gcloud and press Enter. Return
+to Polylane and choose Verify and connect after deployment completes.
+
+The 38-line script embeds one commit-pinned module block, enables the bootstrap
+APIs, creates a dedicated execution service account, grants its installer roles
+and runs `gcloud infra-manager deployments apply --local-source=...`. All inputs
+are literal values from the saved connection request. Commands chain with `&&`
+without shell variables, `set`, traps or a subshell wrapper. Terraform is kept in
+`.polylane/<resource-prefix>/main.tf` for inspection and retry. No environment
+configuration, file download or manual Terraform upload is required.
+
+The [setup guide](../../docs/guides/connect-google-cloud.md) contains the complete
+review example and explains the Terraform-managed alternative.
+
+Infrastructure Manager requires `config.googleapis.com`,
+`cloudbuild.googleapis.com`, `serviceusage.googleapis.com`, `iam.googleapis.com`,
+`cloudresourcemanager.googleapis.com` and `storage.googleapis.com` before apply.
+The bootstrap execution service account receives `roles/config.agent` and the
+installation roles listed in [the parent module](../gcp/README.md). Creating that
+privileged execution identity is part of the generated bootstrap script; this
+child module does not grant its installer project administration permissions.
+The child enables the APIs used by the integration itself.
 
 The runtime reader receives Cloud Asset Viewer, Logging Viewer, Monitoring
 Viewer and Pub/Sub Viewer plus a metadata-only custom role for activation and
@@ -36,3 +55,7 @@ Deletion through IM removes this module's dedicated resources, not the Polylane
 registration. Disconnect in Polylane first. Enabled APIs and Google-managed
 service identities remain enabled because other project workloads may use them.
 The composed parent module orders disconnect before teardown automatically.
+
+The bootstrap execution account and its project-level installer grants are not
+owned by this child. Remove them separately when the deployment no longer needs
+to be updated or destroyed.

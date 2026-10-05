@@ -64,6 +64,7 @@ See [Manage an existing workspace](guides/manage-workspace.md) for the next step
 | Workspace | [Workspace](resources/workspace.md) | Adopt a workspace and manage its name, description, and other supported properties. |
 | Access | [Workspace member](resources/workspace_member.md), [team](resources/team.md), [team member](resources/team_member.md) | Manage existing member roles and scopes, create teams, and maintain team membership. |
 | Cloud connections | [AWS connection request](resources/aws_connection_request.md), [AWS connection](resources/aws_connection.md) | Connect customer-managed AWS infrastructure to Polylane. |
+| Google Cloud (Beta) | [GCP connection request](resources/gcp_connection_request.md), [GCP connection](resources/gcp_connection.md) | [Connect one project](guides/connect-google-cloud.md) using the console script or the composed GCP module. |
 | Operational settings | [Investigations](resources/workspace_investigations_settings.md), [investigation limits](resources/workspace_investigation_limits_settings.md), [autofix](resources/workspace_autofix_settings.md), [PR reviews](resources/workspace_pr_review_settings.md) | Configure how Polylane investigates issues and proposes fixes. |
 | Workspace preferences | [Digest](resources/workspace_digest_settings.md), [observability](resources/workspace_observability_settings.md), [model training](resources/workspace_model_training_settings.md) | Keep workspace preferences under version control. |
 

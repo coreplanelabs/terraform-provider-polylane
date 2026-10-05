@@ -6,6 +6,18 @@ It enables project inventory, Pub/Sub topic and Storage bucket details, change
 and selected log delivery, and read-only investigations. GKE access and
 agent-driven Google mutations are outside this beta.
 
+## Console setup
+
+For a prefilled, copy-and-run experience, use the Polylane console. Enter the
+project ID and number up front; the console produces a 38-line script with
+inline Terraform, bootstrap commands and Infrastructure Manager apply. It uses
+[the Google-only child](../google-connection/README.md) and completes activation
+through the signed-in console. It requires no Polylane provider installation or
+API key in Google Cloud. See the [complete setup guide](../../docs/guides/connect-google-cloud.md).
+
+Use this composed module when Terraform should own both infrastructure and the
+Polylane connection lifecycle.
+
 ## Requirements
 
 This module requires the companion GCP backend and a provider build containing

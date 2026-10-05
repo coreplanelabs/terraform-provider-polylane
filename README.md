@@ -195,3 +195,10 @@ This source requires the companion GCP backend and a provider release containing
 `polylane_gcp_connection_request` and `polylane_gcp_connection`. It is not available
 in the currently published provider release. Local contract checks do not replace
 a full live apply, delivery, disconnect and destroy against that backend.
+
+For console onboarding, enter the project ID and number once and copy the
+prefilled 38-line Infrastructure Manager script. It embeds the Google-only
+module and leaves shell settings unchanged. The [Google Cloud setup guide](docs/guides/connect-google-cloud.md)
+covers this flow and the Terraform-managed alternative. The console path uses
+Google providers and completes activation in Polylane; it does not require a
+published Polylane provider build.
