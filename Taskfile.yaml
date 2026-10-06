@@ -168,7 +168,7 @@ tasks:
         }
         EOF
       - |
-        for dir in modules/google-connection modules/gcp; do
+        for dir in modules/google-connection modules/gcp blueprints/gcp-connection; do
           tofu -chdir="$dir" init -backend=false -input=false
           TF_CLI_CONFIG_FILE="{{.ROOT_DIR}}/.task/opentofu/provider-dev.tfrc" tofu -chdir="$dir" validate
         done

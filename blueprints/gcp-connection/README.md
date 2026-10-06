@@ -10,4 +10,6 @@ The existing [Google connection module](../../modules/google-connection) owns
 the resources and teardown behavior. API bootstrap, the installer account and
 its project roles are prepared before deployment and remain customer-owned.
 The dashboard verifies the resulting federation independently before registering
-the cloud account. This root uses Terraform 1.5.7 and Google providers 7.0.0.
+the cloud account. The dashboard pins the Infrastructure Manager executor to Terraform 1.5.7.
+This root also validates with newer Terraform 1.x tooling and pins the Google
+providers to 7.0.0.
