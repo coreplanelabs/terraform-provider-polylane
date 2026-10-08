@@ -2,7 +2,7 @@
 page_title: "Connect Google Cloud (Beta)"
 subcategory: ""
 description: |-
-  Connect one Google Cloud project using the console setup script or the composed Terraform module.
+  Connect one Google Cloud project through the console, a setup script or Terraform.
 ---
 
 # Connect Google Cloud (Beta)
@@ -10,19 +10,46 @@ description: |-
 Connect one project for inventory across Cloud Asset Inventory resource types,
 including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
 and Storage buckets also have resource logs and metrics. Project Admin Activity
-supports read-only investigation. Kubernetes workloads inside GKE and automated
+supports read-only investigation. Kubernetes API access and automated
 Google changes are outside this beta.
+
+## Set up from the console
+
+1. In Polylane, choose **Continue with Google** and authorize a project
+   administrator account.
+2. Select one project and review the resources, permissions and Google costs.
+3. Choose **Set up connection**. Polylane enables bootstrap APIs, prepares the
+   execution service account and submits a pinned Terraform blueprint to
+   Infrastructure Manager in your project.
+4. When the deployment is ready, choose **Verify and connect**. Polylane checks
+   Google identities, federation, delivery configuration and project access before
+   starting inventory synchronization.
+
+The Google setup token is temporary and is removed after deployment or
+cancellation. Ongoing investigation uses a separate read-only identity with
+short-lived federation credentials. Keep the panel open to advance setup, or
+reopen it to resume. Google continues a deployment already submitted. Choose
+**Authorize again to resume** if setup access expires.
+
+Infrastructure Manager owns Terraform state in your Google project. Cancelling
+setup revokes the pending Polylane request and clears saved setup access; delete
+any Google deployment and its installer account separately. Requests expire
+after seven days. After cancellation or expiry, clean up earlier resources and
+start a new request.
 
 ## Copy and run from the console
 
-Enter your Google project ID and numeric project number in Polylane and choose
+Choose **Use a setup script or Terraform**, enter your Google project ID and
+numeric project number in Polylane and choose
 **Prepare setup**. Choose **Copy setup script**, paste the complete block into
 Google Cloud Shell or a terminal signed in with `gcloud`, and press Enter.
 Your project, workspace and connection identity are already filled in. When the
 script finishes, return to Polylane and choose **Verify and connect**. The saved
-project number is reused when you reopen setup.
+project number is reused when you reopen setup. Switching from dashboard setup
+preserves the existing connection request and pinned blueprint, so it does not
+create a second deployment identity.
 
-The script contains 38 lines, including its Terraform configuration. Commands
+The script includes its Terraform configuration. Commands
 use literal values and `&&` failure chaining. It does not set shell options,
 assign shell variables, install traps, change directories or require environment
 variables. It keeps the generated configuration in a connection-specific
@@ -45,7 +72,7 @@ terraform {
 provider "google" { project = "example-project" }
 provider "google-beta" { project = "example-project" }
 module "polylane_gcp" {
-  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=ecb582fec4d90d0749fd9881d0b54aa431a722c2"
+  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=a44c0a5b158bb6d155bbab22dcbe03e23aee535c"
   project_id = "example-project"
   request_id = "gcpconn_000000000000000000000000"
   subject = "ws_00000000000000000000000000000000:gcpconn_000000000000000000000000"
@@ -103,7 +130,7 @@ Google providers, then add one module block:
 
 ```hcl
 module "polylane_gcp" {
-  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=ecb582fec4d90d0749fd9881d0b54aa431a722c2"
+  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=a44c0a5b158bb6d155bbab22dcbe03e23aee535c"
   workspace_id     = "ws_00000000000000000000000000000000"
   project_id       = "example-project"
   installer_member = "user:administrator@example.com"

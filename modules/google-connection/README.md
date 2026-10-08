@@ -11,14 +11,22 @@ Inputs: `project_id`, `request_id`, `subject`, `issuer_url`, `push_endpoint`,
 service account prefixed with `serviceAccount:` (or the user running Terraform).
 Outputs: `project_number`, `reader_email`, `push_subject`.
 
-## Prefilled Infrastructure Manager setup
+## Console and script setup
 
-In Polylane, enter the project ID and numeric project number up front, choose
-Prepare setup, then Copy setup script. Paste the complete block into Google
-Cloud Shell or a terminal already signed in with gcloud and press Enter. Return
-to Polylane and choose Verify and connect after deployment completes.
+In Polylane, choose **Continue with Google**, authorize a project administrator,
+select a project and review the setup. **Set up connection** enables bootstrap
+APIs, prepares the execution identity and submits this pinned blueprint to
+Infrastructure Manager. Choose **Verify and connect** once deployment is ready.
+Temporary Google setup access is removed after deployment or cancellation.
 
-The 38-line script embeds one commit-pinned module block, enables the bootstrap
+Alternatively, choose **Use a setup script or Terraform**, enter the project ID
+and numeric project number, then choose **Prepare setup** and **Copy setup script**.
+Paste the complete block into Google Cloud Shell or a terminal already signed in
+with gcloud and press Enter. Return to Polylane and choose **Verify and connect**
+after deployment completes. A script resumed from dashboard setup uses that same
+request, resource names and immutable blueprint revision.
+
+The script embeds one commit-pinned module block, enables the bootstrap
 APIs, creates a dedicated execution service account, grants its installer roles
 and runs `gcloud infra-manager deployments apply --local-source=...`. All inputs
 are literal values from the saved connection request. Commands chain with `&&`

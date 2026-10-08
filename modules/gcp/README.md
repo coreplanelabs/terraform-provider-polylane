@@ -5,15 +5,24 @@ request/registration and the Google providers for infrastructure ownership.
 It enables inventory for all resource types supported by Cloud Asset Inventory,
 including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
 and Storage buckets also have resource log and metric collectors. Project Admin
-Activity is available for read-only investigations. Kubernetes workloads inside
-GKE and agent-driven Google mutations are outside this beta.
+Activity is available for read-only investigations. Kubernetes API access and
+agent-driven Google mutations are outside this beta.
 
 ## Console setup
 
-For a prefilled, copy-and-run experience, use the Polylane console. Enter the
-project ID and number up front; the console produces a 38-line script with
-inline Terraform, bootstrap commands and Infrastructure Manager apply. It uses
-[the Google-only child](../google-connection/README.md) and completes activation
+In the Polylane console, choose **Continue with Google**, authorize a project
+administrator account, select a project and review the installation. Choose
+**Set up connection** to prepare the installer and submit the deployment to
+Infrastructure Manager. When it is ready, choose **Verify and connect**.
+Google authorization is temporary; ongoing access uses a separate read-only
+identity. Reopen the panel to resume, and authorize again if setup access expires.
+
+For Cloud Shell or an existing Terraform workflow, choose **Use a setup script
+or Terraform**. Enter the project ID and numeric project number, then choose
+**Prepare setup** and **Copy setup script**. The script contains inline Terraform,
+bootstrap commands and Infrastructure Manager apply. Switching from an existing
+dashboard installation preserves its request and pinned blueprint. Both paths use
+[the Google-only child](../google-connection/README.md) and complete activation
 through the signed-in console. It requires no Polylane provider installation or
 API key in Google Cloud. See the [complete setup guide](../../docs/guides/connect-google-cloud.md).
 
