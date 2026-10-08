@@ -7,9 +7,11 @@ description: |-
 
 # Connect Google Cloud (Beta)
 
-Connect one project for inventory, Pub/Sub topic and Storage bucket details,
-logs, metrics and read-only investigation. GKE access and automated Google
-changes are outside this beta.
+Connect one project for inventory across Cloud Asset Inventory resource types,
+including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
+and Storage buckets also have resource logs and metrics. Project Admin Activity
+supports read-only investigation. Kubernetes workloads inside GKE and automated
+Google changes are outside this beta.
 
 ## Copy and run from the console
 

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -16,14 +17,18 @@ func TestGCPActivationRetry(t *testing.T) {
 	for _, tt := range []struct {
 		name      string
 		statuses  []int
+		detail    string
 		wantCalls int
 		wantError bool
 	}{
-		{"transient eventually registers", []int{500, 429, 200}, 3, false},
-		{"wrong identity is terminal", []int{400}, 1, true},
-		{"unauthorized is terminal", []int{403}, 1, true},
-		{"conflict is terminal", []int{409}, 1, true},
-		{"transient budget exhausted", []int{503}, 6, true},
+		{"transient eventually registers", []int{500, 429, 200}, "", 3, false},
+		{"federation propagation eventually registers", []int{400, 200}, "[400] Google Cloud has not accepted the connection identity. Confirm setup completed, wait a minute, then try again.", 2, false},
+		{"reader propagation eventually registers", []int{400, 200}, "Google Cloud has not granted access to the reader identity. Confirm setup completed, wait a minute, then try again.", 2, false},
+		{"propagation budget exhausted", []int{400}, "[400] Google Cloud has not accepted the connection identity. Confirm setup completed, wait a minute, then try again.", 6, true},
+		{"wrong identity is terminal", []int{400}, "Invalid GCP project number", 1, true},
+		{"unauthorized is terminal", []int{403}, "", 1, true},
+		{"conflict is terminal", []int{409}, "", 1, true},
+		{"transient budget exhausted", []int{503}, "", 6, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -37,6 +42,10 @@ func TestGCPActivationRetry(t *testing.T) {
 					t.Error("retry changed request identity")
 				}
 				body := `{"success":false,"message":"unavailable"}`
+				if tt.detail != "" {
+					encoded, _ := json.Marshal(map[string]any{"success": false, "error": map[string]string{"detail": tt.detail}})
+					body = string(encoded)
+				}
 				if status == 200 {
 					body = `{"success":true,"result":{"requestId":"request","cloudAccountId":"account","provisioningStatus":"registered"}}`
 				}

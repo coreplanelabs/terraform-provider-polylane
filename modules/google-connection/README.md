@@ -40,16 +40,18 @@ The child enables the APIs used by the integration itself.
 
 The runtime reader receives Cloud Asset Viewer, Logging Viewer, Monitoring
 Viewer and Pub/Sub Viewer plus a metadata-only custom role for activation and
-bucket metadata. It has no Storage object read/write grant. The delivery account
+bucket metadata, including `serviceusage.services.use` for project API reads.
+It has no Storage object read/write grant. The delivery account
 has no project roles. Only the project's Pub/Sub service agent can mint its
 push token through the module's service-account binding.
 
 Use a stable public HTTPS issuer. The WIF provider constrains both immutable
 subject and request ID and retains Google's provider-specific default audience.
 Push subscriptions require the exact endpoint as OIDC audience and use a
-dedicated delivery account. Feed coverage is Pub/Sub topics and Storage buckets.
-The Logging sink includes their Admin Activity records and error logs with
-`pubsub_topic` or `gcs_bucket` monitored-resource types.
+dedicated delivery account. The asset feed omits type and name filters, covering
+all resource types supported by Cloud Asset Inventory. The Logging sink forwards
+Pub/Sub and Storage Admin Activity mutations as an additional source of resource
+changes. Log and metric investigations query Google directly.
 
 Deletion through IM removes this module's dedicated resources, not the Polylane
 registration. Disconnect in Polylane first. Enabled APIs and Google-managed

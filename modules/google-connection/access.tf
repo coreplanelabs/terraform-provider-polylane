@@ -31,7 +31,7 @@ resource "google_project_iam_custom_role" "metadata" {
   permissions = [
     "iam.serviceAccounts.get", "iam.workloadIdentityPoolProviders.get",
     "storage.buckets.get", "cloudasset.feeds.get", "logging.sinks.get",
-    "resourcemanager.projects.get"
+    "resourcemanager.projects.get", "serviceusage.services.use"
   ]
   depends_on = [google_project_service.required]
 }

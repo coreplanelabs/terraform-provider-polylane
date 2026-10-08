@@ -128,7 +128,6 @@ resource "google_cloud_asset_project_feed" "connection" {
   project      = var.project_id
   feed_id      = var.resource_prefix
   content_type = "RESOURCE"
-  asset_types  = ["pubsub.googleapis.com/Topic", "storage.googleapis.com/Bucket"]
   feed_output_config {
     pubsub_destination { topic = google_pubsub_topic.events["assets"].id }
   }
@@ -140,7 +139,7 @@ resource "google_logging_project_sink" "connection" {
   name                   = var.resource_prefix
   destination            = "pubsub.googleapis.com/${google_pubsub_topic.events["logs"].id}"
   unique_writer_identity = true
-  filter                 = "(log_id(\"cloudaudit.googleapis.com/activity\") AND (protoPayload.serviceName=\"pubsub.googleapis.com\" OR protoPayload.serviceName=\"storage.googleapis.com\")) OR (severity>=ERROR AND (resource.type=\"pubsub_topic\" OR resource.type=\"gcs_bucket\"))"
+  filter                 = "log_id(\"cloudaudit.googleapis.com/activity\") AND (protoPayload.serviceName=\"pubsub.googleapis.com\" OR protoPayload.serviceName=\"storage.googleapis.com\")"
   depends_on             = [google_pubsub_subscription.events]
 }
 

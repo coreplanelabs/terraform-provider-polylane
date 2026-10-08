@@ -2,9 +2,11 @@
 
 Connect one project with one module. The module uses the Polylane provider for
 request/registration and the Google providers for infrastructure ownership.
-It enables project inventory, Pub/Sub topic and Storage bucket details, change
-and selected log delivery, and read-only investigations. GKE access and
-agent-driven Google mutations are outside this beta.
+It enables inventory for all resource types supported by Cloud Asset Inventory,
+including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
+and Storage buckets also have resource log and metric collectors. Project Admin
+Activity is available for read-only investigations. Kubernetes workloads inside
+GKE and agent-driven Google mutations are outside this beta.
 
 ## Console setup
 
