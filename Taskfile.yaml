@@ -172,6 +172,7 @@ tasks:
           tofu -chdir="$dir" init -backend=false -input=false
           TF_CLI_CONFIG_FILE="{{.ROOT_DIR}}/.task/opentofu/provider-dev.tfrc" tofu -chdir="$dir" validate
         done
+      - tofu -chdir=blueprints/gcp-connection test
 
   docs:
     desc: "Generate and validate Terraform Registry documentation"
