@@ -1,17 +1,17 @@
 ---
-page_title: "Connect Google Cloud (Beta)"
+page_title: "Connect Google Cloud"
 subcategory: ""
 description: |-
   Connect one Google Cloud project through the console, a setup script or Terraform.
 ---
 
-# Connect Google Cloud (Beta)
+# Connect Google Cloud
 
 Connect one project for inventory across Cloud Asset Inventory resource types,
 including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
 and Storage buckets also have resource logs and metrics. Project Admin Activity
 supports read-only investigation. Kubernetes API access and automated
-Google changes are outside this beta.
+Google changes are not supported.
 
 ## Set up from the console
 
@@ -77,7 +77,7 @@ module "polylane_gcp" {
   request_id = "gcpconn_000000000000000000000000"
   subject = "ws_00000000000000000000000000000000:gcpconn_000000000000000000000000"
   issuer_url = "https://api.polylane.com/v1/gcp_federation/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
-  push_endpoint = "https://api.polylane.com/v1/gcp_events/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
+  push_endpoint = "https://gcp.polylane.com/v1/gcp_events/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
   resource_prefix = "polylane-0000000000000000"
   installer_member = "serviceAccount:polylane-0000000000000000-im@example-project.iam.gserviceaccount.com"
 }

@@ -2,12 +2,12 @@
 page_title: "polylane_gcp_connection Resource - Polylane"
 subcategory: "Workspace settings"
 description: |-
-  Activates a beta Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.
+  Activates a Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.
 ---
 
 # polylane_gcp_connection (Resource)
 
-Activates a beta Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.
+Activates a Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.
 
 ## Example Usage
 

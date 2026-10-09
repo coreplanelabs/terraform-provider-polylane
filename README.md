@@ -108,7 +108,7 @@ task generate:check # fail if generated code has drifted
 task sync:openapi   # download production /v1/doc, normalize, generate, and test
 ```
 
-Model-training settings and the GCP beta handshake use handwritten adapters because
+Model-training settings and the GCP handshake use handwritten adapters because
 those routes are not yet in the checked-in OpenAPI document. GCP contract tests
 cover methods, paths, JSON fields, response identity checks and disconnected reads.
 Regenerate the GCP adapter when the backend contract reaches the published spec.
@@ -184,17 +184,18 @@ archive build without signing or publishing.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions and
 [SECURITY.md](SECURITY.md) for private vulnerability reports.
 
-### Google Cloud beta connections
+### Google Cloud connections
 
 Use the [GCP module](modules/gcp/README.md) for one connection block that composes
 the Google resources with Polylane request and registration resources. Google
-Cloud support is beta: one project, Pub/Sub topics, Storage buckets, inventory,
-logs and metrics. GKE access and agent-driven Google changes are excluded.
+Cloud supports one project with broad Cloud Asset Inventory discovery. Pub/Sub
+topics and Storage buckets also provide resource logs and metrics. Kubernetes
+API access and agent-driven Google changes are not supported.
 
-This source requires the companion GCP backend and a provider release containing
-`polylane_gcp_connection_request` and `polylane_gcp_connection`. It is not available
-in the currently published provider release. Local contract checks do not replace
-a full live apply, delivery, disconnect and destroy against that backend.
+Provider v0.2.1 includes `polylane_gcp_connection_request` and
+`polylane_gcp_connection`; the companion GCP backend must be deployed. Local
+contract checks do not replace a full live apply, delivery, disconnect and destroy
+against that backend.
 
 For console onboarding, enter the project ID and number once and copy the
 prefilled 38-line Infrastructure Manager script. It embeds the Google-only
