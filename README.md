@@ -108,8 +108,10 @@ task generate:check # fail if generated code has drifted
 task sync:openapi   # download production /v1/doc, normalize, generate, and test
 ```
 
-The model-training settings route is deliberately the sole handwritten client
-exception because that route is not published in the OpenAPI document.
+Model-training settings and the GCP beta handshake use handwritten adapters because
+those routes are not yet in the checked-in OpenAPI document. GCP contract tests
+cover methods, paths, JSON fields, response identity checks and disconnected reads.
+Regenerate the GCP adapter when the backend contract reaches the published spec.
 
 Provider configuration can come from Terraform configuration or environment variables:
 
@@ -181,3 +183,22 @@ archive build without signing or publishing.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contributions and
 [SECURITY.md](SECURITY.md) for private vulnerability reports.
+
+### Google Cloud beta connections
+
+Use the [GCP module](modules/gcp/README.md) for one connection block that composes
+the Google resources with Polylane request and registration resources. Google
+Cloud support is beta: one project, Pub/Sub topics, Storage buckets, inventory,
+logs and metrics. GKE access and agent-driven Google changes are excluded.
+
+This source requires the companion GCP backend and a provider release containing
+`polylane_gcp_connection_request` and `polylane_gcp_connection`. It is not available
+in the currently published provider release. Local contract checks do not replace
+a full live apply, delivery, disconnect and destroy against that backend.
+
+For console onboarding, enter the project ID and number once and copy the
+prefilled 38-line Infrastructure Manager script. It embeds the Google-only
+module and leaves shell settings unchanged. The [Google Cloud setup guide](docs/guides/connect-google-cloud.md)
+covers this flow and the Terraform-managed alternative. The console path uses
+Google providers and completes activation in Polylane; it does not require a
+published Polylane provider build.
