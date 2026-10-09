@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.2.0...v0.2.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **gcp:** select all asset types for resource feed ([#24](https://github.com/coreplanelabs/terraform-provider-polylane/issues/24)) ([0d1c76d](https://github.com/coreplanelabs/terraform-provider-polylane/commit/0d1c76d219fba0ab17380d0eac74641bdca7f70e))
+
 ## [0.2.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.2...v0.2.0) (2026-10-09)
 
 
