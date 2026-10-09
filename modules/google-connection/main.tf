@@ -128,6 +128,7 @@ resource "google_cloud_asset_project_feed" "connection" {
   project      = var.project_id
   feed_id      = var.resource_prefix
   content_type = "RESOURCE"
+  asset_types  = [".*"]
   feed_output_config {
     pubsub_destination { topic = google_pubsub_topic.events["assets"].id }
   }
@@ -149,4 +150,3 @@ resource "google_pubsub_topic_iam_member" "log_publisher" {
   role    = "roles/pubsub.publisher"
   member  = google_logging_project_sink.connection.writer_identity
 }
-
