@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.2...v0.2.0) (2026-10-09)
+
+
+### Features
+
+* **provider:** add beta GCP connection resources and module ([#20](https://github.com/coreplanelabs/terraform-provider-polylane/issues/20)) ([388335e](https://github.com/coreplanelabs/terraform-provider-polylane/commit/388335e1f412b4258a693701f7c9caeb60bfc7e4))
+
+
+### Bug Fixes
+
+* upgrade to Go 1.27.2 and patched HTTP dependencies ([#22](https://github.com/coreplanelabs/terraform-provider-polylane/issues/22)) ([4d6cec6](https://github.com/coreplanelabs/terraform-provider-polylane/commit/4d6cec6d33b9345e7573769176199d0e0eef501f))
+
 ## [0.1.2](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.1.1...v0.1.2) (2026-09-28)
 
 
