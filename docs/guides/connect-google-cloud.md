@@ -72,7 +72,7 @@ terraform {
 provider "google" { project = "example-project" }
 provider "google-beta" { project = "example-project" }
 module "polylane_gcp" {
-  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=a44c0a5b158bb6d155bbab22dcbe03e23aee535c"
+  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=v0.2.0"
   project_id = "example-project"
   request_id = "gcpconn_000000000000000000000000"
   subject = "ws_00000000000000000000000000000000:gcpconn_000000000000000000000000"
@@ -110,10 +110,16 @@ are separate from the runtime reader's read-only grants.
 
 `--local-source` uploads the generated Terraform directory; no manually uploaded
 archive or customer source repository is needed. The Terraform root uses one
-commit-pinned `modules/google-connection` block and only Google providers.
+release-pinned `modules/google-connection` block and only Google providers.
 Polylane authenticates the final verification through the console, so this
 Infrastructure Manager deployment needs no Polylane API key or Polylane provider
 binary. The Google console link shows deployment progress.
+
+The examples pin the protected release tag `v0.2.0`. Released tags are retained
+and must not be moved or deleted. Retry the same deployment with its reviewed
+ref, connection request and Terraform state. Before updating that deployment
+to a different released blueprint, review its configuration and pin its explicit
+version tag. Do not use a floating branch or `latest` when applying.
 
 A stopped script can be rerun with the same identity. Pending requests last seven
 days. If a request expires or is cancelled, remove its old Google deployment and
@@ -130,7 +136,7 @@ Google providers, then add one module block:
 
 ```hcl
 module "polylane_gcp" {
-  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=a44c0a5b158bb6d155bbab22dcbe03e23aee535c"
+  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=v0.2.0"
   workspace_id     = "ws_00000000000000000000000000000000"
   project_id       = "example-project"
   installer_member = "user:administrator@example.com"
@@ -142,11 +148,10 @@ The module obtains the project number from Google and connects it to the request
 It waits for every Google resource and IAM grant before activation, and orders
 Polylane disconnect before infrastructure teardown on destroy.
 
-This composed path requires a Polylane provider build containing
-`polylane_gcp_connection_request` and `polylane_gcp_connection`, plus the companion
-backend. Until those resources are released, reviewers must use a local provider
-build. The console's Google-only Infrastructure Manager path does not depend on
-publishing that provider build. See the [module requirements and lifecycle](https://github.com/coreplanelabs/terraform-provider-polylane/tree/codex/gcp-beta-connection/modules/gcp).
+This composed path uses the released Polylane provider `v0.2.0`, which contains
+`polylane_gcp_connection_request` and `polylane_gcp_connection`, and requires the
+companion backend. The console's Google-only Infrastructure Manager path does not
+require a Polylane provider binary. See the [module requirements and lifecycle](https://github.com/coreplanelabs/terraform-provider-polylane/tree/main/modules/gcp).
 
 Registration completes before initial inventory synchronization. A transient
 server error can be retried within the provider's bounded activation budget;
