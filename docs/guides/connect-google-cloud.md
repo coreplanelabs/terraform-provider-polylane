@@ -72,7 +72,7 @@ terraform {
 provider "google" { project = "example-project" }
 provider "google-beta" { project = "example-project" }
 module "polylane_gcp" {
-  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=v0.2.0"
+  source = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/google-connection?ref=v0.2.1"
   project_id = "example-project"
   request_id = "gcpconn_000000000000000000000000"
   subject = "ws_00000000000000000000000000000000:gcpconn_000000000000000000000000"
@@ -115,7 +115,7 @@ Polylane authenticates the final verification through the console, so this
 Infrastructure Manager deployment needs no Polylane API key or Polylane provider
 binary. The Google console link shows deployment progress.
 
-The examples pin the protected release tag `v0.2.0`. Released tags are retained
+The examples pin the protected release tag `v0.2.1`. Released tags are retained
 and must not be moved or deleted. Retry the same deployment with its reviewed
 ref, connection request and Terraform state. Before updating that deployment
 to a different released blueprint, review its configuration and pin its explicit
@@ -136,7 +136,7 @@ Google providers, then add one module block:
 
 ```hcl
 module "polylane_gcp" {
-  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=v0.2.0"
+  source           = "git::https://github.com/coreplanelabs/terraform-provider-polylane.git//modules/gcp?ref=v0.2.1"
   workspace_id     = "ws_00000000000000000000000000000000"
   project_id       = "example-project"
   installer_member = "user:administrator@example.com"
