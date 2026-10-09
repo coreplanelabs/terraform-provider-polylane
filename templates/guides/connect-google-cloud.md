@@ -77,7 +77,7 @@ module "polylane_gcp" {
   request_id = "gcpconn_000000000000000000000000"
   subject = "ws_00000000000000000000000000000000:gcpconn_000000000000000000000000"
   issuer_url = "https://api.polylane.com/v1/gcp_federation/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
-  push_endpoint = "https://api.polylane.com/v1/gcp_events/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
+  push_endpoint = "https://gcp.polylane.com/v1/gcp_events/ws_00000000000000000000000000000000/gcpconn_000000000000000000000000"
   resource_prefix = "polylane-0000000000000000"
   installer_member = "serviceAccount:polylane-0000000000000000-im@example-project.iam.gserviceaccount.com"
 }
