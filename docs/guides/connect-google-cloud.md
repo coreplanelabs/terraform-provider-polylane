@@ -1,17 +1,17 @@
 ---
-page_title: "Connect Google Cloud (Beta)"
+page_title: "Connect Google Cloud"
 subcategory: ""
 description: |-
   Connect one Google Cloud project through the console, a setup script or Terraform.
 ---
 
-# Connect Google Cloud (Beta)
+# Connect Google Cloud
 
 Connect one project for inventory across Cloud Asset Inventory resource types,
 including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
 and Storage buckets also have resource logs and metrics. Project Admin Activity
 supports read-only investigation. Kubernetes API access and automated
-Google changes are outside this beta.
+Google changes are not supported.
 
 ## Set up from the console
 

@@ -1,4 +1,4 @@
-# Google Cloud connection (Beta)
+# Google Cloud connection
 
 Connect one project with one module. The module uses the Polylane provider for
 request/registration and the Google providers for infrastructure ownership.
@@ -6,7 +6,7 @@ It enables inventory for all resource types supported by Cloud Asset Inventory,
 including Compute Engine, Cloud Run, GKE, Cloud SQL and networking. Pub/Sub topics
 and Storage buckets also have resource log and metric collectors. Project Admin
 Activity is available for read-only investigations. Kubernetes API access and
-agent-driven Google mutations are outside this beta.
+agent-driven Google mutations are not supported.
 
 ## Console setup
 

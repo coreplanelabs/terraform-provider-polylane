@@ -30,7 +30,7 @@ func (r *gcpConnectionResource) Metadata(_ context.Context, req resource.Metadat
 	resp.TypeName = req.ProviderTypeName + "_gcp_connection"
 }
 func (r *gcpConnectionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{Description: "Activates a beta Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.", Attributes: map[string]schema.Attribute{
+	resp.Schema = schema.Schema{Description: "Activates a Google Cloud connection after customer-managed Google resources and IAM grants are ready. Destroy disconnects Polylane before Google teardown.", Attributes: map[string]schema.Attribute{
 		"workspace_id":   schema.StringAttribute{Required: true, Description: "Polylane workspace ID.", Validators: []validator.String{stringvalidator.RegexMatches(workspaceIDPattern, "must be a valid workspace_id")}, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		"request_id":     schema.StringAttribute{Required: true, Description: "ID returned by polylane_gcp_connection_request.", Validators: []validator.String{stringvalidator.LengthBetween(1, 128)}, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		"project_number": schema.StringAttribute{Required: true, Description: "Numeric Google Cloud project number.", Validators: []validator.String{stringvalidator.RegexMatches(gcpProjectNumberPattern, "must be a valid project_number")}, PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
