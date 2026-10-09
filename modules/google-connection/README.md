@@ -56,8 +56,9 @@ push token through the module's service-account binding.
 Use a stable public HTTPS issuer. The WIF provider constrains both immutable
 subject and request ID and retains Google's provider-specific default audience.
 Push subscriptions require the exact endpoint as OIDC audience and use a
-dedicated delivery account. The asset feed omits type and name filters, covering
-all resource types supported by Cloud Asset Inventory. The Logging sink forwards
+dedicated delivery account. The asset feed uses the `.*` asset-type regular
+expression, covering all resource types supported by Cloud Asset Inventory.
+The Logging sink forwards
 Pub/Sub and Storage Admin Activity mutations as an additional source of resource
 changes. Log and metric investigations query Google directly.
 
