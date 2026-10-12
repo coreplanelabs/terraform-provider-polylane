@@ -16,14 +16,16 @@ provider "google" { project = var.project_id }
 provider "google-beta" { project = var.project_id }
 
 module "connection" {
-  source           = "../../modules/google-connection"
-  project_id       = var.project_id
-  request_id       = var.request_id
-  subject          = var.subject
-  issuer_url       = var.issuer_url
-  push_endpoint    = var.push_endpoint
-  resource_prefix  = var.resource_prefix
-  installer_member = var.installer_member
+  source                 = "../../modules/google-connection"
+  project_id             = var.project_id
+  request_id             = var.request_id
+  subject                = var.subject
+  issuer_url             = var.issuer_url
+  push_endpoint          = var.push_endpoint
+  resource_prefix        = var.resource_prefix
+  installer_member       = var.installer_member
+  gke_access_enabled     = var.gke_access_enabled
+  gke_operations_enabled = var.gke_operations_enabled
 }
 
 output "project_number" { value = module.connection.project_number }
