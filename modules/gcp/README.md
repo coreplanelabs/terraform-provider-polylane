@@ -104,3 +104,15 @@ activation. Inspect the `${resource_prefix}-dead-letters` pull subscription,
 persist envelopes before acknowledging, unwrap their original message and
 republish to the original assets/logs topic. Initial reconciliation restores
 inventory; logs require replay. Both primary and dead-letter retention are one day.
+
+## GKE access
+
+GKE object reads and pod logs use the same federated runtime service account.
+`gke_access_enabled` defaults to `true`; set it to `false` to omit Kubernetes grants.
+Enable external access through each cluster's DNS endpoint, or connect the Polylane
+Kubernetes agent for clusters whose network or service perimeter blocks access.
+
+`gke_operations_enabled` defaults to `false`. Enabling it grants Kubernetes Engine
+Developer access and node updates to the runtime identity. Polylane also requires
+workspace write access, safety review and human approval before mutations.
+Reapply this module to add GKE permissions to an existing connection.

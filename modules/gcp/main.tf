@@ -21,14 +21,16 @@ resource "polylane_gcp_connection_request" "this" {
 }
 
 module "google_connection" {
-  source           = "../google-connection"
-  project_id       = var.project_id
-  request_id       = polylane_gcp_connection_request.this.id
-  subject          = polylane_gcp_connection_request.this.subject
-  issuer_url       = polylane_gcp_connection_request.this.issuer_url
-  push_endpoint    = polylane_gcp_connection_request.this.push_endpoint
-  resource_prefix  = polylane_gcp_connection_request.this.resource_prefix
-  installer_member = var.installer_member
+  source                 = "../google-connection"
+  project_id             = var.project_id
+  request_id             = polylane_gcp_connection_request.this.id
+  subject                = polylane_gcp_connection_request.this.subject
+  issuer_url             = polylane_gcp_connection_request.this.issuer_url
+  push_endpoint          = polylane_gcp_connection_request.this.push_endpoint
+  resource_prefix        = polylane_gcp_connection_request.this.resource_prefix
+  installer_member       = var.installer_member
+  gke_access_enabled     = var.gke_access_enabled
+  gke_operations_enabled = var.gke_operations_enabled
 }
 
 resource "polylane_gcp_connection" "this" {

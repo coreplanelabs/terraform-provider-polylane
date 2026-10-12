@@ -42,3 +42,15 @@ variable "installer_member" {
     error_message = "Provide the user: or serviceAccount: IAM member executing this deployment."
   }
 }
+
+variable "gke_access_enabled" {
+  type        = bool
+  default     = true
+  description = "Grant the runtime identity GKE object reads and pod logs in this project. Cluster endpoints must permit access."
+}
+
+variable "gke_operations_enabled" {
+  type        = bool
+  default     = false
+  description = "Grant the runtime identity Kubernetes Engine Developer and node update permissions for approved workload operations."
+}
