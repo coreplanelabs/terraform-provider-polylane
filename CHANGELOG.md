@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.2.1...v0.3.0) (2026-10-13)
+
+
+### Features
+
+* **gcp:** grant GKE reads and optional workload operations ([#27](https://github.com/coreplanelabs/terraform-provider-polylane/issues/27)) ([f5090df](https://github.com/coreplanelabs/terraform-provider-polylane/commit/f5090df5ee063ab8a03ce3c73f4131c5c7210087))
+
+
+### Bug Fixes
+
+* **ci:** name the exact release in the create-github-app-token pin comment ([#29](https://github.com/coreplanelabs/terraform-provider-polylane/issues/29)) ([42e7a88](https://github.com/coreplanelabs/terraform-provider-polylane/commit/42e7a883f8cdadd1e954661812c0d9bd08a29cff))
+
 ## [0.2.1](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.2.0...v0.2.1) (2026-10-09)
 
 
