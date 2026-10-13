@@ -2,12 +2,12 @@
 page_title: "polylane_gcp_connection_request Resource - Polylane"
 subcategory: "Workspace settings"
 description: |-
-  Creates a beta Google Cloud connection request. Use the returned public identity to provision Google resources before activation.
+  Creates a Google Cloud connection request. Use the returned public identity to provision Google resources before activation.
 ---
 
 # polylane_gcp_connection_request (Resource)
 
-Creates a beta Google Cloud connection request. Use the returned public identity to provision Google resources before activation.
+Creates a Google Cloud connection request. Use the returned public identity to provision Google resources before activation.
 
 ## Example Usage
 
