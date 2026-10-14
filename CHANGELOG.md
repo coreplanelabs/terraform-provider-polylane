@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.3.0...v0.4.0) (2026-10-14)
+
+
+### Features
+
+* **gcp:** grant the connection reader Cloud Trace access ([#30](https://github.com/coreplanelabs/terraform-provider-polylane/issues/30)) ([9c16e0e](https://github.com/coreplanelabs/terraform-provider-polylane/commit/9c16e0e4cd635d9cb4a99f1fd7897e15e368c583))
+
 ## [0.3.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.2.1...v0.3.0) (2026-10-13)
 
 
