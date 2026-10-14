@@ -29,7 +29,7 @@ resource "google_project_iam_custom_role" "metadata" {
   role_id = replace("${var.resource_prefix}_metadata", "-", "_")
   title   = "Polylane connection metadata"
   permissions = [
-    "iam.serviceAccounts.get", "iam.workloadIdentityPoolProviders.get",
+    "iam.serviceAccounts.get", "iam.workloadIdentityPoolProviders.get", "iam.roles.get",
     "storage.buckets.get", "cloudasset.feeds.get", "logging.sinks.get",
     "resourcemanager.projects.get", "serviceusage.services.use",
     "cloudtrace.traces.get", "cloudtrace.traces.list"
