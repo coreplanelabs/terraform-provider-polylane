@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.4.0...v0.5.0) (2026-10-14)
+
+
+### Features
+
+* **gcp:** grant reader project role-definition access ([#33](https://github.com/coreplanelabs/terraform-provider-polylane/issues/33)) ([3ceba2e](https://github.com/coreplanelabs/terraform-provider-polylane/commit/3ceba2e2f72067e4f0bdfa200c9d0bc940b4c9c9))
+
 ## [0.4.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.3.0...v0.4.0) (2026-10-14)
 
 
