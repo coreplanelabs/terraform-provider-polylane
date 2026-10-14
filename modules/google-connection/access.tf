@@ -1,6 +1,6 @@
 resource "google_project_service" "required" {
   for_each = toset([
-    "cloudasset.googleapis.com", "cloudresourcemanager.googleapis.com",
+    "cloudasset.googleapis.com", "cloudresourcemanager.googleapis.com", "cloudtrace.googleapis.com",
     "iam.googleapis.com", "iamcredentials.googleapis.com", "logging.googleapis.com",
     "monitoring.googleapis.com", "pubsub.googleapis.com", "sts.googleapis.com",
     "storage.googleapis.com", "container.googleapis.com"
@@ -31,7 +31,8 @@ resource "google_project_iam_custom_role" "metadata" {
   permissions = [
     "iam.serviceAccounts.get", "iam.workloadIdentityPoolProviders.get",
     "storage.buckets.get", "cloudasset.feeds.get", "logging.sinks.get",
-    "resourcemanager.projects.get", "serviceusage.services.use"
+    "resourcemanager.projects.get", "serviceusage.services.use",
+    "cloudtrace.traces.get", "cloudtrace.traces.list"
   ]
   depends_on = [google_project_service.required]
 }

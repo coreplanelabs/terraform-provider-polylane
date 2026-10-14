@@ -47,8 +47,12 @@ child module does not grant its installer project administration permissions.
 The child enables the APIs used by the integration itself.
 
 The runtime reader receives Cloud Asset Viewer, Logging Viewer, Monitoring
-Viewer and Pub/Sub Viewer plus a metadata-only custom role for activation and
-bucket metadata, including `serviceusage.services.use` for project API reads.
+Viewer and Pub/Sub Viewer plus a custom role for activation, bucket metadata
+and trace reads, including `serviceusage.services.use` for project API reads.
+The module enables Cloud Trace and grants `cloudtrace.traces.get` and
+`cloudtrace.traces.list` to this reader. Trace collection uses the application's
+existing instrumentation. Reapply the module to add trace access to an existing
+connection.
 It has no Storage object read/write grant. The delivery account
 has no project roles. Only the project's Pub/Sub service agent can mint its
 push token through the module's service-account binding.

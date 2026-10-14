@@ -25,3 +25,10 @@ Kubernetes agent for clusters whose network or service perimeter blocks access.
 Developer access and node updates to the runtime identity. Polylane also requires
 workspace write access, safety review and human approval before mutations.
 Reapply this module to add GKE permissions to an existing connection.
+
+## Trace access
+
+The connection enables the Cloud Trace API and grants the runtime reader
+`cloudtrace.traces.get` and `cloudtrace.traces.list`. The application supplies
+traces through its existing instrumentation. Update the deployment to a revision
+with these grants to add trace access to an existing connection.
