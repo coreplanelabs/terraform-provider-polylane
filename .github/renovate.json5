@@ -1,6 +1,72 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:best-practices",
+    ":ignoreUnstable",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "semanticCommitScope": "deps",
+  "rebaseWhen": "behind-base-branch",
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/.hermit/**",
+    "**/.terraform/**",
+    "dist/**"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Go runtime upgrades must remain compatible with the Hermit toolchain.",
+      "matchDatasources": [
+        "golang-version"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "CI actions, build tools and infrastructure provider updates require review.",
+      "matchManagers": [
+        "github-actions",
+        "hermit",
+        "terraform"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Google and Google Beta providers share schemas and must use the same release.",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchPackageNames": [
+        "hashicorp/google",
+        "hashicorp/google-beta"
+      ],
+      "groupName": "Google Terraform providers"
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": false
+  },
+  "prConcurrentLimit": 6,
+  "prHourlyLimit": 12,
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ],
+    "prConcurrentLimit": 6
+  }
 }
