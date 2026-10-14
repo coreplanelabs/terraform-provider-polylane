@@ -53,6 +53,12 @@ The module enables Cloud Trace and grants `cloudtrace.traces.get` and
 `cloudtrace.traces.list` to this reader. Trace collection uses the application's
 existing instrumentation. Reapply the module to add trace access to an existing
 connection.
+The custom reader role includes `iam.roles.get` at the connected project for
+IAM permission analysis. Cloud Asset Viewer supplies `cloudasset.assets.listIamPolicy`.
+The reader can resolve predefined and project custom roles; it receives no
+folder or organization grant. Installer IAM administration permissions do not
+supply runtime reader access. Reapply the module for an existing reader to receive
+role-definition access.
 It has no Storage object read/write grant. The delivery account
 has no project roles. Only the project's Pub/Sub service agent can mint its
 push token through the module's service-account binding.
