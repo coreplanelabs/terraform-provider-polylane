@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.5.0...v0.5.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* **build:** use Go 1.27.3 to reject compromised emSign keys ([#35](https://github.com/coreplanelabs/terraform-provider-polylane/issues/35)) ([34a65a7](https://github.com/coreplanelabs/terraform-provider-polylane/commit/34a65a72ce75b05cf4773c7c3f54ae7b259cbaea))
+
 ## [0.5.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.4.0...v0.5.0) (2026-10-14)
 
 
