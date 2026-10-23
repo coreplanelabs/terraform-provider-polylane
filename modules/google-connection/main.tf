@@ -92,11 +92,11 @@ resource "google_pubsub_subscription" "events" {
   }
   retry_policy {
     minimum_backoff = "10s"
-    maximum_backoff = "60s"
+    maximum_backoff = "600s"
   }
   dead_letter_policy {
     dead_letter_topic     = google_pubsub_topic.events["dead-letters"].id
-    max_delivery_attempts = 5
+    max_delivery_attempts = 100
   }
   depends_on = [google_service_account_iam_member.push_token, google_service_account_iam_member.installer_push, google_pubsub_topic_iam_member.dead_letter_publisher]
 }
