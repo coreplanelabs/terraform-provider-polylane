@@ -61,4 +61,12 @@ run "broad_resource_feed" {
     condition     = length(google_cloud_asset_project_feed.connection.condition) == 0
     error_message = "The feed must deliver creation, updates and deletion observations."
   }
+
+  assert {
+    condition = alltrue([
+      for subscription in google_pubsub_subscription.events :
+      subscription.dead_letter_policy[0].max_delivery_attempts == 100 && subscription.retry_policy[0].maximum_backoff == "600s"
+    ])
+    error_message = "Every event subscription must keep delivering for the whole onboarding window instead of dead-lettering after a few minutes."
+  }
 }
