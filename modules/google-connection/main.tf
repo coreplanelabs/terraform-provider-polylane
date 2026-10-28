@@ -1,22 +1,35 @@
 data "google_project" "connection" { project_id = var.project_id }
 
+locals {
+  reader_roles = [
+    "roles/cloudasset.viewer", "roles/monitoring.viewer", "roles/logging.viewer", "roles/pubsub.viewer",
+    "roles/iam.securityReviewer", "roles/serviceusage.serviceUsageViewer",
+    "roles/compute.viewer", "roles/run.viewer", "roles/cloudfunctions.viewer", "roles/cloudsql.viewer",
+    "roles/spanner.viewer", "roles/bigtable.viewer", "roles/bigquery.metadataViewer", "roles/redis.viewer",
+    "roles/memcache.viewer", "roles/file.viewer", "roles/dns.reader", "roles/vpcaccess.viewer",
+    "roles/cloudbuild.builds.viewer", "roles/clouddeploy.viewer", "roles/cloudscheduler.viewer",
+    "roles/workflows.viewer", "roles/eventarc.viewer", "roles/dataflow.viewer", "roles/dataproc.viewer",
+    "roles/apigateway.viewer", "roles/secretmanager.viewer", "roles/cloudkms.viewer",
+  ]
+}
+
 resource "google_service_account" "reader" {
   depends_on   = [google_project_service.required]
   project      = var.project_id
   account_id   = "${var.resource_prefix}-read"
-  display_name = "Polylane beta runtime reader"
+  display_name = "Polylane runtime reader"
 }
 
 resource "google_service_account" "push" {
   depends_on   = [google_project_service.required]
   project      = var.project_id
   account_id   = "${var.resource_prefix}-push"
-  display_name = "Polylane beta Pub/Sub delivery"
+  display_name = "Polylane Pub/Sub delivery"
 }
 
 resource "google_project_iam_member" "reader" {
   project  = var.project_id
-  for_each = toset(["roles/cloudasset.viewer", "roles/monitoring.viewer", "roles/logging.viewer", "roles/pubsub.viewer"])
+  for_each = toset(local.reader_roles)
   role     = each.value
   member   = google_service_account.reader.member
 }
@@ -25,7 +38,7 @@ resource "google_iam_workload_identity_pool" "connection" {
   depends_on                = [google_project_service.required]
   project                   = var.project_id
   workload_identity_pool_id = var.resource_prefix
-  display_name              = "Polylane beta connection"
+  display_name              = "Polylane connection"
 }
 
 resource "google_iam_workload_identity_pool_provider" "connection" {
@@ -65,7 +78,7 @@ resource "google_pubsub_topic" "events" {
   project    = var.project_id
   for_each   = toset(["assets", "logs", "dead-letters"])
   name       = "${var.resource_prefix}-${each.key}"
-  labels     = { purpose = "polylane-gcp-beta" }
+  labels     = { purpose = "polylane-connection" }
 }
 
 resource "google_pubsub_topic_iam_member" "dead_letter_publisher" {
