@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.5.0...v0.6.0) (2026-10-28)
+
+
+### Features
+
+* **gcp:** give the reader configuration access and drop beta names ([#38](https://github.com/coreplanelabs/terraform-provider-polylane/issues/38)) ([b1c5738](https://github.com/coreplanelabs/terraform-provider-polylane/commit/b1c573811437eeabdcf1f1eb74c6636ff7d5bc90))
+
+
+### Bug Fixes
+
+* **build:** use Go 1.27.3 to reject compromised emSign keys ([#35](https://github.com/coreplanelabs/terraform-provider-polylane/issues/35)) ([34a65a7](https://github.com/coreplanelabs/terraform-provider-polylane/commit/34a65a72ce75b05cf4773c7c3f54ae7b259cbaea))
+* **gcp:** keep event delivery retries alive through connection activation ([#37](https://github.com/coreplanelabs/terraform-provider-polylane/issues/37)) ([a250b24](https://github.com/coreplanelabs/terraform-provider-polylane/commit/a250b245e84c7393376eff5fb8a73020ae1b448d))
+
 ## [0.5.0](https://github.com/coreplanelabs/terraform-provider-polylane/compare/v0.4.0...v0.5.0) (2026-10-14)
 
 
