@@ -1,4 +1,4 @@
-# Google-only connection infrastructure (Beta)
+# Google-only connection infrastructure
 
 This child module is the Infrastructure Manager blueprint and the infrastructure
 part of `../gcp`. It uses only `hashicorp/google` and `hashicorp/google-beta`.
@@ -49,6 +49,18 @@ The child enables the APIs used by the integration itself.
 The runtime reader receives Cloud Asset Viewer, Logging Viewer, Monitoring
 Viewer and Pub/Sub Viewer plus a custom role for activation, bucket metadata
 and trace reads, including `serviceusage.services.use` for project API reads.
+For configuration reads during investigations, it also receives Security
+Reviewer, Service Usage Viewer and the metadata viewer role of each supported
+service: Compute, Cloud Run, Cloud Functions, Cloud SQL, Spanner, Bigtable,
+BigQuery metadata, Memorystore for Redis and Memcached, Filestore, Cloud DNS
+reader, Serverless VPC Access, Cloud Build builds, Cloud Deploy, Cloud
+Scheduler, Workflows, Eventarc, Dataflow, Dataproc, API Gateway, Secret Manager
+and Cloud KMS. The full list is `local.reader_roles` in `main.tf`. These
+predefined roles read configuration and metadata. They do not read secret
+payloads, BigQuery table rows or Storage objects. Artifact Registry and AlloyDB
+have no metadata-only predefined role, so the custom role grants only their
+repository, image, cluster and instance `get` and `list` permissions. Reapply
+the module to give an existing reader these grants.
 The module enables Cloud Trace and grants `cloudtrace.traces.get` and
 `cloudtrace.traces.list` to this reader. Trace collection uses the application's
 existing instrumentation. Reapply the module to add trace access to an existing

@@ -32,7 +32,11 @@ resource "google_project_iam_custom_role" "metadata" {
     "iam.serviceAccounts.get", "iam.workloadIdentityPoolProviders.get", "iam.roles.get",
     "storage.buckets.get", "cloudasset.feeds.get", "logging.sinks.get",
     "resourcemanager.projects.get", "serviceusage.services.use",
-    "cloudtrace.traces.get", "cloudtrace.traces.list"
+    "cloudtrace.traces.get", "cloudtrace.traces.list",
+    "artifactregistry.repositories.get", "artifactregistry.repositories.list",
+    "artifactregistry.dockerimages.get", "artifactregistry.dockerimages.list",
+    "artifactregistry.packages.list", "artifactregistry.versions.list", "artifactregistry.tags.list",
+    "alloydb.clusters.get", "alloydb.clusters.list", "alloydb.instances.get", "alloydb.instances.list"
   ]
   depends_on = [google_project_service.required]
 }
