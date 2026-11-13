@@ -19,21 +19,21 @@ func TestGCPConnectionContract(t *testing.T) {
 		name, method, path, body, result string
 		invoke                           func(context.Context, *Client) error
 	}{
-		{"create", "POST", "/v1/gcp_connection_requests", `"projectId":"example-project"`, `{"requestId":"gcp_request","workspaceId":"workspace","projectId":"example-project","status":"pending"}`, func(ctx context.Context, c *Client) error {
+		{"create", "POST", "/v1/cloud_accounts/gcp/requests", `"projectId":"example-project"`, `{"requestId":"gcp_request","workspaceId":"workspace","projectId":"example-project","status":"pending"}`, func(ctx context.Context, c *Client) error {
 			_, err := c.CreateGCPConnectionRequest(ctx, CreateGCPConnectionRequestInput{WorkspaceID: "workspace", ProjectID: "example-project", IdempotencyKey: "unique"})
 			return err
 		}},
-		{"read", "GET", "/v1/gcp_connection_requests/workspace/gcp_request", "", `{"requestId":"gcp_request","workspaceId":"workspace","projectId":"example-project","status":"active","cloudAccountId":"account"}`, func(ctx context.Context, c *Client) error {
+		{"read", "GET", "/v1/cloud_accounts/gcp/requests/workspace/gcp_request", "", `{"requestId":"gcp_request","workspaceId":"workspace","projectId":"example-project","status":"active","cloudAccountId":"account"}`, func(ctx context.Context, c *Client) error {
 			v, err := c.GetGCPConnection(ctx, "workspace", "account", "gcp_request")
 			if err == nil && v.Status != "registered" {
 				return fmt.Errorf("unstable registration status: %s", v.Status)
 			}
 			return err
 		}},
-		{"revoke", "DELETE", "/v1/gcp_connection_requests/workspace/gcp_request", "{}", `{}`, func(ctx context.Context, c *Client) error {
+		{"revoke", "DELETE", "/v1/cloud_accounts/gcp/requests/workspace/gcp_request", "{}", `{}`, func(ctx context.Context, c *Client) error {
 			return c.DeleteGCPConnectionRequest(ctx, "workspace", "gcp_request")
 		}},
-		{"activate", "POST", "/v1/gcp_connections", `"projectNumber":"123456789"`, `{"requestId":"gcp_request","cloudAccountId":"account","provisioningStatus":"registered"}`, func(ctx context.Context, c *Client) error {
+		{"activate", "POST", "/v1/cloud_accounts/gcp/activate", `"projectNumber":"123456789"`, `{"requestId":"gcp_request","cloudAccountId":"account","provisioningStatus":"registered"}`, func(ctx context.Context, c *Client) error {
 			_, err := c.ActivateGCPConnection(ctx, ActivateGCPConnectionInput{WorkspaceID: "workspace", RequestID: "gcp_request", ProjectNumber: "123456789"})
 			return err
 		}},

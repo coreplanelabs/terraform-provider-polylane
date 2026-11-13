@@ -42,7 +42,7 @@ type GCPConnection struct {
 
 func (c *Client) CreateGCPConnectionRequest(ctx context.Context, input CreateGCPConnectionRequestInput) (*GCPConnectionRequest, error) {
 	var result GCPConnectionRequest
-	if err := c.do(ctx, http.MethodPost, "/gcp_connection_requests", input, &result); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/cloud_accounts/gcp/requests", input, &result); err != nil {
 		return nil, err
 	}
 	if result.ID == "" || result.WorkspaceID != input.WorkspaceID || result.ProjectID != input.ProjectID {
@@ -67,12 +67,12 @@ func (c *Client) DeleteGCPConnectionRequest(ctx context.Context, workspaceID, re
 }
 
 func gcpRequestPath(workspaceID, requestID string) string {
-	return "/gcp_connection_requests/" + url.PathEscape(workspaceID) + "/" + url.PathEscape(requestID)
+	return "/cloud_accounts/gcp/requests/" + url.PathEscape(workspaceID) + "/" + url.PathEscape(requestID)
 }
 
 func (c *Client) ActivateGCPConnection(ctx context.Context, input ActivateGCPConnectionInput) (*GCPConnection, error) {
 	var result GCPConnection
-	if err := c.do(ctx, http.MethodPost, "/gcp_connections", input, &result); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/cloud_accounts/gcp/activate", input, &result); err != nil {
 		return nil, err
 	}
 	if result.ID == "" || result.RequestID != input.RequestID || result.Status != "registered" {
